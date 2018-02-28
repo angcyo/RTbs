@@ -1,6 +1,7 @@
 package com.angcyo.rtbs;
 
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -41,6 +42,10 @@ public class X5WebUIView extends UIContentView {
     private X5RefreshLayout mRefreshLayout;
 
     private boolean showDefaultMenu = true;
+    /**
+     * 正在处理的下载链接
+     */
+    private String downloadUrl = "";
 
     public X5WebUIView(String targetUrl) {
 //        String encode = targetUrl;
@@ -262,6 +267,37 @@ public class X5WebUIView extends UIContentView {
 //                }
 //            }
         }, "android");
+
+        mWebView.setMyDownloadListener(new X5WebView.MyDownloadListener() {
+            @Override
+            public void onDownloadStart(String url /*下载地址*/, String userAgent /*user agent*/,
+                                        String contentDisposition, String mime /*文件mime application/zip*/,
+                                        long length /*文件大小 kb*/) {
+                if (TextUtils.equals(downloadUrl, url)) {
+
+                } else {
+                    downloadUrl = url;
+                    X5FileDownloadUIView dialog = new X5FileDownloadUIView();
+                    dialog.mDownloadFileBean = new DownloadFileBean();
+                    dialog.mDownloadFileBean.url = url;
+                    dialog.mDownloadFileBean.userAgent = userAgent;
+                    dialog.mDownloadFileBean.fileType = mime;
+                    dialog.mDownloadFileBean.fileSize = length;
+                    dialog.mDownloadFileBean.fileName = url;
+                    dialog.mDownloadFileBean.contentDisposition = contentDisposition;
+                    dialog.mDownloadListener = new X5FileDownloadUIView.OnDownloadListener() {
+                        @Override
+                        public void onDownload(DownloadFileBean bean) {
+                            downloadUrl = "";
+                            if (bean == null) {
+
+                            }
+                        }
+                    };
+                    mParentILayout.startIView(dialog);
+                }
+            }
+        });
     }
 
     public void invokeJs(String method, String params) {
@@ -324,6 +360,12 @@ public class X5WebUIView extends UIContentView {
         mWebView.onPause();
         mWebView.pauseTimers();
         mActivity.getWindow().setSoftInputMode(mSoftInputMode);
+    }
+
+    @Override
+    public void onViewUnload() {
+        super.onViewUnload();
+        mWebView.destroy();
     }
 
     @Override

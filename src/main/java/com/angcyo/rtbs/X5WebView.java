@@ -17,7 +17,6 @@ import android.widget.TextView;
 import com.angcyo.library.utils.L;
 import com.angcyo.uiview.design.IWebView;
 import com.angcyo.uiview.utils.RUtils;
-import com.angcyo.uiview.utils.T_;
 import com.tencent.smtt.export.external.interfaces.ClientCertRequest;
 import com.tencent.smtt.export.external.interfaces.IX5WebChromeClient.CustomViewCallback;
 import com.tencent.smtt.export.external.interfaces.JsPromptResult;
@@ -293,6 +292,8 @@ public class X5WebView extends WebView implements IWebView {
     private boolean isScrollToBottom = false;//手指向下
     private int mLastDeltaY;
 
+    private MyDownloadListener mDownloadListener;
+
     @SuppressLint("SetJavaScriptEnabled")
     public X5WebView(Context arg0, AttributeSet arg1) {
         super(arg0, arg1);
@@ -314,11 +315,17 @@ public class X5WebView extends WebView implements IWebView {
         });
         this.setDownloadListener(new DownloadListener() {
             @Override
-            public void onDownloadStart(String url, String s1, String s2, String s3, long length) {
-                L.e("call: onDownloadStart([url, s1, s2, s3, l])-> \n" + url + "\n" + s1 + "\n" + s2 + "\n" + s3 + "\n" + length);
-                if (RUtils.downLoadFile(getContext(), url) != -1) {
-                    T_.show("正在下载文件:" + RUtils.getFileNameFromUrl(url));
-                    goBack();
+            public void onDownloadStart(String url /*下载地址*/, String userAgent /*user agent*/,
+                                        String contentDisposition, String mime /*文件mime application/zip*/,
+                                        long length /*文件大小 kb*/) {
+                L.e("call: onDownloadStart([url, userAgent, s2, s3, l])-> \n" + url + "\n" + userAgent + "\n" + contentDisposition + "\n" + mime + "\n" + length);
+//                if (RUtils.downLoadFile(getContext(), url) != -1) {
+//                    T_.show("正在下载文件:" + RUtils.getFileNameFromUrl(url));
+//                    goBack();
+//                }
+
+                if (mDownloadListener != null) {
+                    mDownloadListener.onDownloadStart(url, userAgent, contentDisposition, mime, length);
                 }
             }
         });
@@ -327,6 +334,14 @@ public class X5WebView extends WebView implements IWebView {
     public X5WebView(Context arg0) {
         super(arg0);
         setBackgroundColor(85621);
+    }
+
+    public static void setSmallWebViewEnabled(boolean enabled) {
+        isSmallWebViewDisplayed = enabled;
+    }
+
+    public MyDownloadListener getMyDownloadListener() {
+        return mDownloadListener;
     }
 
 //    @Override
@@ -350,8 +365,8 @@ public class X5WebView extends WebView implements IWebView {
 //        return ret;
 //    }
 
-    public static void setSmallWebViewEnabled(boolean enabled) {
-        isSmallWebViewDisplayed = enabled;
+    public void setMyDownloadListener(MyDownloadListener downloadListener) {
+        mDownloadListener = downloadListener;
     }
 
     private void initWebViewSettings() {
@@ -620,6 +635,12 @@ public class X5WebView extends WebView implements IWebView {
         void onReceivedTitle(WebView webView, final String title);
 
         void onProgressChanged(WebView webView, int progress);
+    }
+
+    public interface MyDownloadListener {
+        void onDownloadStart(String url /*下载地址*/, String userAgent /*user agent*/,
+                             String contentDisposition, String mime /*文件mime application/zip*/,
+                             long length /*文件大小 kb*/);
     }
 
 }
