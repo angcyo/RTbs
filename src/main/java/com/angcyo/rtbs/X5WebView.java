@@ -55,78 +55,6 @@ public class X5WebView extends WebView implements IWebView {
     private TextView tog;
     private RelativeLayout refreshRela;
     private OnWebViewListener mOnWebViewListener;
-    private WebViewClient client = new WebViewClient() {
-        @Override
-        public boolean shouldOverrideUrlLoading(WebView webView, String url) {
-            L.e("call: shouldOverrideUrlLoading([webView, url])-> " + url + " title:" + webView.getTitle());
-            RUtils.saveToSDCard("webview.log", "title:" + webView.getTitle() + " url:" + url);
-
-            if (!TextUtils.isEmpty(url) && url.startsWith("http")) {
-                webView.loadUrl(url);
-            } else if (!TextUtils.isEmpty(url)) {
-                RUtils.openAppFromUrl(getContext(), url);
-//                Uri webPage = Uri.parse(url);
-//                Intent webIntent = new Intent(Intent.ACTION_VIEW);
-//                webIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-//                webIntent.setData(webPage);
-//                //webIntent.setDataAndType(webPage, "application/vnd.android.package-archive");
-//                try {
-//                    getContext().startActivity(webIntent);
-//                } catch (Exception e) {
-//                    e.printStackTrace();
-//                }
-            }
-            return true;
-        }
-
-        @Override
-        public void onPageFinished(WebView webView, String url) {
-            super.onPageFinished(webView, url);
-            //L.e("call: onPageFinished([webView, url])-> ");
-            if (mOnWebViewListener != null) {
-                mOnWebViewListener.onPageFinished(webView, url);
-            }
-        }
-
-        @Override
-        public void onReceivedError(WebView webView, int i, String s, String s1) {
-            super.onReceivedError(webView, i, s, s1);
-            //L.e("call: onReceivedError([webView, i, s, s1])-> ");
-        }
-
-        @Override
-        public void onReceivedError(WebView webView, WebResourceRequest webResourceRequest, WebResourceError webResourceError) {
-            super.onReceivedError(webView, webResourceRequest, webResourceError);
-            //L.e("call: onReceivedError([webView, webResourceRequest, webResourceError])-> ");
-        }
-
-        @Override
-        public void onReceivedHttpError(WebView webView, WebResourceRequest webResourceRequest, WebResourceResponse webResourceResponse) {
-            super.onReceivedHttpError(webView, webResourceRequest, webResourceResponse);
-            //L.e("call: onReceivedHttpError([webView, webResourceRequest, webResourceResponse])-> ");
-        }
-
-        @Override
-        public void onReceivedClientCertRequest(WebView webView, ClientCertRequest clientCertRequest) {
-            super.onReceivedClientCertRequest(webView, clientCertRequest);
-            //L.e("call: onReceivedClientCertRequest([webView, clientCertRequest])-> ");
-        }
-
-        //        /**
-//         * 防止加载网页时调起系统浏览器
-//         */
-//        public boolean shouldOverrideUrlLoading(WebView view, String url) {
-//            view.getSettings().setDefaultTextEncodingName("utf-8");
-//            view.loadUrl(url);
-//            return true;
-//        }
-//
-//        public void onReceivedHttpAuthRequest(WebView webview,
-//                                              com.tencent.smtt.export.external.interfaces.HttpAuthHandler httpAuthHandlerhost, String host,
-//                                              String realm) {
-//            boolean flag = httpAuthHandlerhost.useHttpAuthUsernamePassword();
-//        }
-    };
     private WebChromeClient chromeClient = new WebChromeClient() {
 
         View myVideoView;
@@ -291,8 +219,88 @@ public class X5WebView extends WebView implements IWebView {
     private float mDownY;
     private boolean isScrollToBottom = false;//手指向下
     private int mLastDeltaY;
-
     private MyDownloadListener mDownloadListener;
+    private OnOpenAppListener mOnOpenAppListener;
+    private WebViewClient client = new WebViewClient() {
+        @Override
+        public boolean shouldOverrideUrlLoading(WebView webView, String url) {
+            L.e("call: shouldOverrideUrlLoading([webView, url])-> " + url + " title:" + webView.getTitle());
+            RUtils.saveToSDCard("webview.log", "title:" + webView.getTitle() + " url:" + url);
+
+            if (!TextUtils.isEmpty(url) && url.startsWith("http")) {
+                webView.loadUrl(url);
+            } else if (!TextUtils.isEmpty(url)) {
+                //RUtils.openAppFromUrl(getContext(), url);
+
+                RUtils.QueryAppBean appBean = RUtils.queryIntentFromUrl(url);
+                if (appBean != null) {
+                    if (mOnOpenAppListener != null) {
+                        mOnOpenAppListener.onOpenApp(appBean);
+                    }
+                }
+
+//                Uri webPage = Uri.parse(url);
+//                Intent webIntent = new Intent(Intent.ACTION_VIEW);
+//                webIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+//                webIntent.setData(webPage);
+//                //webIntent.setDataAndType(webPage, "application/vnd.android.package-archive");
+//                try {
+//                    getContext().startActivity(webIntent);
+//                } catch (Exception e) {
+//                    e.printStackTrace();
+//                }
+            }
+            return true;
+        }
+
+        @Override
+        public void onPageFinished(WebView webView, String url) {
+            super.onPageFinished(webView, url);
+            //L.e("call: onPageFinished([webView, url])-> ");
+            if (mOnWebViewListener != null) {
+                mOnWebViewListener.onPageFinished(webView, url);
+            }
+        }
+
+        @Override
+        public void onReceivedError(WebView webView, int i, String s, String s1) {
+            super.onReceivedError(webView, i, s, s1);
+            //L.e("call: onReceivedError([webView, i, s, s1])-> ");
+        }
+
+        @Override
+        public void onReceivedError(WebView webView, WebResourceRequest webResourceRequest, WebResourceError webResourceError) {
+            super.onReceivedError(webView, webResourceRequest, webResourceError);
+            //L.e("call: onReceivedError([webView, webResourceRequest, webResourceError])-> ");
+        }
+
+        @Override
+        public void onReceivedHttpError(WebView webView, WebResourceRequest webResourceRequest, WebResourceResponse webResourceResponse) {
+            super.onReceivedHttpError(webView, webResourceRequest, webResourceResponse);
+            //L.e("call: onReceivedHttpError([webView, webResourceRequest, webResourceResponse])-> ");
+        }
+
+        @Override
+        public void onReceivedClientCertRequest(WebView webView, ClientCertRequest clientCertRequest) {
+            super.onReceivedClientCertRequest(webView, clientCertRequest);
+            //L.e("call: onReceivedClientCertRequest([webView, clientCertRequest])-> ");
+        }
+
+        //        /**
+//         * 防止加载网页时调起系统浏览器
+//         */
+//        public boolean shouldOverrideUrlLoading(WebView view, String url) {
+//            view.getSettings().setDefaultTextEncodingName("utf-8");
+//            view.loadUrl(url);
+//            return true;
+//        }
+//
+//        public void onReceivedHttpAuthRequest(WebView webview,
+//                                              com.tencent.smtt.export.external.interfaces.HttpAuthHandler httpAuthHandlerhost, String host,
+//                                              String realm) {
+//            boolean flag = httpAuthHandlerhost.useHttpAuthUsernamePassword();
+//        }
+    };
 
     @SuppressLint("SetJavaScriptEnabled")
     public X5WebView(Context arg0, AttributeSet arg1) {
@@ -340,10 +348,6 @@ public class X5WebView extends WebView implements IWebView {
         isSmallWebViewDisplayed = enabled;
     }
 
-    public MyDownloadListener getMyDownloadListener() {
-        return mDownloadListener;
-    }
-
 //    @Override
 //    protected boolean drawChild(Canvas canvas, View child, long drawingTime) {
 //        boolean ret = super.drawChild(canvas, child, drawingTime);
@@ -364,6 +368,10 @@ public class X5WebView extends WebView implements IWebView {
 //        canvas.restore();
 //        return ret;
 //    }
+
+    public MyDownloadListener getMyDownloadListener() {
+        return mDownloadListener;
+    }
 
     public void setMyDownloadListener(MyDownloadListener downloadListener) {
         mDownloadListener = downloadListener;
@@ -625,6 +633,15 @@ public class X5WebView extends WebView implements IWebView {
         return computeVerticalScrollRange();
     }
 
+    public OnOpenAppListener getOnOpenAppListener() {
+        return mOnOpenAppListener;
+    }
+
+    public void setOnOpenAppListener(OnOpenAppListener onOpenAppListener) {
+        mOnOpenAppListener = onOpenAppListener;
+    }
+
+
     public interface OnWebViewListener {
         void onScroll(int left, int top, int dx, int dy);
 
@@ -643,4 +660,7 @@ public class X5WebView extends WebView implements IWebView {
                              long length /*文件大小 kb*/);
     }
 
+    public interface OnOpenAppListener {
+        void onOpenApp(RUtils.QueryAppBean appBean);
+    }
 }

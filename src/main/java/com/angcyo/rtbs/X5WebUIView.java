@@ -1,18 +1,24 @@
 package com.angcyo.rtbs;
 
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.text.TextUtils;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.angcyo.library.utils.L;
 import com.angcyo.uiview.base.UIContentView;
+import com.angcyo.uiview.base.UIIDialogImpl;
 import com.angcyo.uiview.container.ContentLayout;
 import com.angcyo.uiview.dialog.UIBottomItemDialog;
+import com.angcyo.uiview.dialog.UIDialog;
 import com.angcyo.uiview.model.TitleBarPattern;
+import com.angcyo.uiview.recycler.RBaseViewHolder;
 import com.angcyo.uiview.rsen.RefreshLayout;
 import com.angcyo.uiview.utils.RUtils;
 import com.angcyo.uiview.widget.EmptyView;
@@ -296,6 +302,40 @@ public class X5WebUIView extends UIContentView {
                     };
                     mParentILayout.startIView(dialog);
                 }
+            }
+        });
+
+        mWebView.setOnOpenAppListener(new X5WebView.OnOpenAppListener() {
+            @Override
+            public void onOpenApp(final RUtils.QueryAppBean appBean) {
+                UIDialog.build()
+                        .setDialogContent("请求打开应用")
+                        .setOkText("打开")
+                        .setOkClick(new UIDialog.OnDialogClick() {
+                            @Override
+                            public void onDialogClick(UIDialog dialog, View clickView) {
+                                mActivity.startActivity(appBean.startIntent);
+                            }
+                        })
+                        .setOnInitDialogContent(new UIIDialogImpl.OnInitDialogContent() {
+                            @Override
+                            public void onInitDialogContent(@NonNull UIIDialogImpl dialog, @NonNull RBaseViewHolder viewHolder) {
+                                RTextView contentView = viewHolder.v(R.id.base_dialog_content_view);
+                                LinearLayout.LayoutParams layoutParams = (LinearLayout.LayoutParams) contentView.getLayoutParams();
+                                layoutParams.gravity = Gravity.CENTER_HORIZONTAL;
+                                contentView.setLayoutParams(layoutParams);
+
+                                RTextView topContentView = viewHolder.v(R.id.base_dialog_top_content_view);
+                                topContentView.setGravity(Gravity.CENTER_HORIZONTAL);
+                                topContentView.setVisibility(View.VISIBLE);
+                                topContentView.setText(appBean.mAppInfo.appName);
+                                RTextView.setTopIco(topContentView, appBean.mAppInfo.appIcon);
+                                layoutParams = (LinearLayout.LayoutParams) topContentView.getLayoutParams();
+                                layoutParams.gravity = Gravity.CENTER_HORIZONTAL;
+                                topContentView.setLayoutParams(layoutParams);
+                            }
+                        })
+                        .showDialog(mParentILayout);
             }
         });
     }
