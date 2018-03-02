@@ -283,7 +283,7 @@ public class X5WebUIView extends UIContentView {
                     dialog.mDownloadFileBean.userAgent = userAgent;
                     dialog.mDownloadFileBean.fileType = mime;
                     dialog.mDownloadFileBean.fileSize = length;
-                    dialog.mDownloadFileBean.fileName = url;
+                    dialog.mDownloadFileBean.fileName = RUtils.getFileNameFromAttachment(contentDisposition);
                     dialog.mDownloadFileBean.contentDisposition = contentDisposition;
                     dialog.mDownloadListener = new X5FileDownloadUIView.OnDownloadListener() {
                         @Override

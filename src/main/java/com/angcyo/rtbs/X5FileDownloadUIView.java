@@ -1,6 +1,7 @@
 package com.angcyo.rtbs;
 
 import android.support.annotation.NonNull;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.FrameLayout;
@@ -42,7 +43,20 @@ public class X5FileDownloadUIView extends UIIDialogRxImpl {
     protected void initDialogContentView() {
         super.initDialogContentView();
         if (mDownloadFileBean != null) {
-            final String fileName = RUtils.getFileNameFromUrl(mDownloadFileBean.url);
+            String name;
+            if (TextUtils.isEmpty(mDownloadFileBean.fileName)) {
+                name = RUtils.getFileNameFromUrl(mDownloadFileBean.url);
+            } else {
+                name = mDownloadFileBean.fileName;
+            }
+
+//            RUtils.trimMarks("s", "s");
+//            RUtils.trimMarks("s", "S");
+//            RUtils.trimMarks("ss", "s");
+//            RUtils.trimMarks(fileName, "\"");
+
+            final String fileName = RUtils.trimMarks(name, "\"");
+
             mViewHolder.tv(R.id.target_url_view).setText(mDownloadFileBean.url);
             mViewHolder.tv(R.id.file_name_view).setText(fileName);
             mViewHolder.tv(R.id.file_size_view).setText(RUtils.formatFileSize(mDownloadFileBean.fileSize));
