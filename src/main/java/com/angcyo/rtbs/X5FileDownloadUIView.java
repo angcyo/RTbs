@@ -8,6 +8,7 @@ import android.widget.FrameLayout;
 
 import com.angcyo.uiview.base.UIIDialogRxImpl;
 import com.angcyo.uiview.container.UIParam;
+import com.angcyo.uiview.skin.SkinHelper;
 import com.angcyo.uiview.utils.RUtils;
 import com.angcyo.uiview.utils.T_;
 
@@ -61,6 +62,7 @@ public class X5FileDownloadUIView extends UIIDialogRxImpl {
             mViewHolder.tv(R.id.file_name_view).setText(fileName);
             mViewHolder.tv(R.id.file_size_view).setText(RUtils.formatFileSize(mDownloadFileBean.fileSize));
             mViewHolder.tv(R.id.file_type_view).setText(mDownloadFileBean.fileType);
+            mViewHolder.tv(R.id.download_button).setTextColor(SkinHelper.getSkin().getThemeSubColor());
 
             mViewHolder.click(R.id.download_button, new View.OnClickListener() {
                 @Override
