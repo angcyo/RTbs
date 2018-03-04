@@ -17,6 +17,7 @@ import com.angcyo.uiview.base.UIIDialogImpl;
 import com.angcyo.uiview.container.ContentLayout;
 import com.angcyo.uiview.dialog.UIBottomItemDialog;
 import com.angcyo.uiview.dialog.UIDialog;
+import com.angcyo.uiview.model.TitleBarItem;
 import com.angcyo.uiview.model.TitleBarPattern;
 import com.angcyo.uiview.recycler.RBaseViewHolder;
 import com.angcyo.uiview.rsen.RefreshLayout;
@@ -118,9 +119,9 @@ public class X5WebUIView extends UIContentView {
                 }
             }
 
-        }).setOnItemInitListener(new TitleBarPattern.TitleBarItem.OnItemInitListener() {
+        }).setOnItemInitListener(new TitleBarItem.OnItemInitListener() {
             @Override
-            public void onItemInit(View itemView, TitleBarPattern.TitleBarItem item) {
+            public void onItemInit(View itemView, TitleBarItem item) {
                 if (itemView instanceof TextView) {
                     RTextView.setLeftIco((TextView) itemView, R.drawable.base_back);
                 }
