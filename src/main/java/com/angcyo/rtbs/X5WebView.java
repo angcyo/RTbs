@@ -24,6 +24,7 @@ import com.tencent.smtt.export.external.interfaces.JsResult;
 import com.tencent.smtt.export.external.interfaces.WebResourceError;
 import com.tencent.smtt.export.external.interfaces.WebResourceRequest;
 import com.tencent.smtt.export.external.interfaces.WebResourceResponse;
+import com.tencent.smtt.sdk.CookieManager;
 import com.tencent.smtt.sdk.CookieSyncManager;
 import com.tencent.smtt.sdk.DownloadListener;
 import com.tencent.smtt.sdk.ValueCallback;
@@ -369,6 +370,18 @@ public class X5WebView extends WebView implements IWebView {
 //        return ret;
 //    }
 
+    /**
+     * 清除Cookie
+     *
+     * @param context
+     */
+    public static void removeCookie(Context context) {
+        CookieSyncManager.createInstance(context);
+        CookieManager cookieManager = CookieManager.getInstance();
+        cookieManager.removeAllCookie();
+        CookieSyncManager.getInstance().sync();
+    }
+
     public MyDownloadListener getMyDownloadListener() {
         return mDownloadListener;
     }
@@ -382,7 +395,7 @@ public class X5WebView extends WebView implements IWebView {
         webSetting.setDefaultTextEncodingName("utf-8");
 
         webSetting.setJavaScriptEnabled(true);
-
+        //webSetting.setCacheMode(android.webkit.WebSettings.LOAD_NO_CACHE);
         webSetting.setAllowFileAccess(true);
         webSetting.setLayoutAlgorithm(LayoutAlgorithm.NARROW_COLUMNS);
         webSetting.setSupportZoom(true);
@@ -641,6 +654,21 @@ public class X5WebView extends WebView implements IWebView {
         mOnOpenAppListener = onOpenAppListener;
     }
 
+    /**
+     * 设置Cookie
+     * synCookies(this, "www.baidu.com", "age=20;sex=1;time=today");
+     *
+     * @param context
+     * @param url
+     * @param cookie  格式：uid=21233 如需设置多个，需要多次调用
+     */
+    public void synCookies(Context context, String url, String cookie) {
+        CookieSyncManager.createInstance(context);
+        CookieManager cookieManager = CookieManager.getInstance();
+        cookieManager.setAcceptCookie(true);
+        cookieManager.setCookie(url, cookie);//cookies是在HttpClient中获得的cookie
+        CookieSyncManager.getInstance().sync();
+    }
 
     public interface OnWebViewListener {
         void onScroll(int left, int top, int dx, int dy);
