@@ -226,8 +226,8 @@ public class X5WebUIView extends UIContentView {
         onLoadUrl();
 
         if (L.LOG_DEBUG) {
-            mViewHolder.tv(R.id.url_view).setText(mTargetUrl);
             mViewHolder.tv(R.id.url_view).setVisibility(View.VISIBLE);
+            mViewHolder.tv(R.id.url_view).setText(mTargetUrl + "\n" + mWebView.getSettings().getUserAgentString());
         }
     }
 
