@@ -17,8 +17,10 @@ import android.widget.TextView;
 import com.angcyo.library.utils.L;
 import com.angcyo.uiview.design.IWebView;
 import com.angcyo.uiview.utils.RUtils;
+import com.angcyo.uiview.utils.Reflect;
 import com.tencent.smtt.export.external.interfaces.ClientCertRequest;
 import com.tencent.smtt.export.external.interfaces.IX5WebChromeClient.CustomViewCallback;
+import com.tencent.smtt.export.external.interfaces.IX5WebViewBase;
 import com.tencent.smtt.export.external.interfaces.JsPromptResult;
 import com.tencent.smtt.export.external.interfaces.JsResult;
 import com.tencent.smtt.export.external.interfaces.WebResourceError;
@@ -306,9 +308,21 @@ public class X5WebView extends WebView implements IWebView {
     @SuppressLint("SetJavaScriptEnabled")
     public X5WebView(Context arg0, AttributeSet arg1) {
         super(arg0, arg1);
+        initWebView();
+    }
+
+    public X5WebView(Context arg0) {
+        super(arg0);
+        initWebView();
+    }
+
+    protected void initWebView() {
         if (isInEditMode()) {
             return;
         }
+
+        //setBackgroundColor(85621);
+        //setOverScrollMode(View.OVER_SCROLL_NEVER);
 
         this.setWebViewClientExtension(new X5WebViewEventHandler(this));// 配置X5webview的事件处理
         this.setWebViewClient(client);
@@ -338,11 +352,23 @@ public class X5WebView extends WebView implements IWebView {
                 }
             }
         });
+
+        resetOverScrollMode();
     }
 
-    public X5WebView(Context arg0) {
-        super(arg0);
-        setBackgroundColor(85621);
+    protected void resetOverScrollMode() {
+        Object f = Reflect.getMember(WebView.class, this, "f");
+        Object g = Reflect.getMember(WebView.class, this, "g");
+        if (f instanceof IX5WebViewBase) {
+            try {
+                ((IX5WebViewBase) f).getView().setOverScrollMode(View.OVER_SCROLL_NEVER);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        if (g instanceof View) {
+            ((View) g).setOverScrollMode(View.OVER_SCROLL_NEVER);
+        }
     }
 
     public static void setSmallWebViewEnabled(boolean enabled) {
@@ -566,6 +592,8 @@ public class X5WebView extends WebView implements IWebView {
 //            }
 //
 //        }
+//        resetOverScrollMode();
+
         int actionMasked = MotionEventCompat.getActionMasked(event);
         if (actionMasked == MotionEvent.ACTION_DOWN) {
             mDownY = event.getY();
