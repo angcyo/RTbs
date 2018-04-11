@@ -2,6 +2,7 @@ package com.angcyo.rtbs;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.net.Uri;
@@ -18,6 +19,7 @@ import com.angcyo.library.utils.L;
 import com.angcyo.uiview.design.IWebView;
 import com.angcyo.uiview.utils.RUtils;
 import com.angcyo.uiview.utils.Reflect;
+import com.github.lzyzsd.jsbridge.BridgeWebView;
 import com.tencent.smtt.export.external.interfaces.ClientCertRequest;
 import com.tencent.smtt.export.external.interfaces.IX5WebChromeClient.CustomViewCallback;
 import com.tencent.smtt.export.external.interfaces.IX5WebViewBase;
@@ -44,7 +46,7 @@ import java.util.Map;
 //import com.tencent.smtt.sdk.WebStorage;
 //import com.tencent.smtt.sdk.WebViewDatabase;
 
-public class X5WebView extends WebView implements IWebView {
+public class X5WebView extends BridgeWebView implements IWebView {
     public static final int FILE_CHOOSER = 0;
     private static boolean isSmallWebViewDisplayed = false;
     RelativeLayout.LayoutParams layoutParams;
@@ -227,6 +229,8 @@ public class X5WebView extends WebView implements IWebView {
     private WebViewClient client = new WebViewClient() {
         @Override
         public boolean shouldOverrideUrlLoading(WebView webView, String url) {
+            mBridgeWebViewClient.shouldOverrideUrlLoading(webView, url);
+
             L.e("call: shouldOverrideUrlLoading([webView, url])-> " + url + " title:" + webView.getTitle());
             RUtils.saveToSDCard("webview.log", "title:" + webView.getTitle() + " url:" + url);
 
@@ -257,8 +261,20 @@ public class X5WebView extends WebView implements IWebView {
         }
 
         @Override
+        public boolean shouldOverrideUrlLoading(WebView webView, WebResourceRequest webResourceRequest) {
+            return mBridgeWebViewClient.shouldOverrideUrlLoading(webView, webResourceRequest);
+        }
+
+        @Override
+        public void onPageStarted(WebView webView, String s, Bitmap bitmap) {
+            super.onPageStarted(webView, s, bitmap);
+            mBridgeWebViewClient.onPageStarted(webView, s, bitmap);
+        }
+
+        @Override
         public void onPageFinished(WebView webView, String url) {
             super.onPageFinished(webView, url);
+            mBridgeWebViewClient.onPageFinished(webView, url);
             //L.e("call: onPageFinished([webView, url])-> ");
             if (mOnWebViewListener != null) {
                 mOnWebViewListener.onPageFinished(webView, url);
@@ -316,6 +332,22 @@ public class X5WebView extends WebView implements IWebView {
         initWebView();
     }
 
+    public static void setSmallWebViewEnabled(boolean enabled) {
+        isSmallWebViewDisplayed = enabled;
+    }
+
+    /**
+     * 清除Cookie
+     *
+     * @param context
+     */
+    public static void removeCookie(Context context) {
+        CookieSyncManager.createInstance(context);
+        CookieManager cookieManager = CookieManager.getInstance();
+        cookieManager.removeAllCookie();
+        CookieSyncManager.getInstance().sync();
+    }
+
     protected void initWebView() {
         if (isInEditMode()) {
             return;
@@ -356,25 +388,6 @@ public class X5WebView extends WebView implements IWebView {
         resetOverScrollMode();
     }
 
-    protected void resetOverScrollMode() {
-        Object f = Reflect.getMember(WebView.class, this, "f");
-        Object g = Reflect.getMember(WebView.class, this, "g");
-        if (f instanceof IX5WebViewBase) {
-            try {
-                ((IX5WebViewBase) f).getView().setOverScrollMode(View.OVER_SCROLL_NEVER);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-        if (g instanceof View) {
-            ((View) g).setOverScrollMode(View.OVER_SCROLL_NEVER);
-        }
-    }
-
-    public static void setSmallWebViewEnabled(boolean enabled) {
-        isSmallWebViewDisplayed = enabled;
-    }
-
 //    @Override
 //    protected boolean drawChild(Canvas canvas, View child, long drawingTime) {
 //        boolean ret = super.drawChild(canvas, child, drawingTime);
@@ -396,16 +409,19 @@ public class X5WebView extends WebView implements IWebView {
 //        return ret;
 //    }
 
-    /**
-     * 清除Cookie
-     *
-     * @param context
-     */
-    public static void removeCookie(Context context) {
-        CookieSyncManager.createInstance(context);
-        CookieManager cookieManager = CookieManager.getInstance();
-        cookieManager.removeAllCookie();
-        CookieSyncManager.getInstance().sync();
+    protected void resetOverScrollMode() {
+        Object f = Reflect.getMember(WebView.class, this, "f");
+        Object g = Reflect.getMember(WebView.class, this, "g");
+        if (f instanceof IX5WebViewBase) {
+            try {
+                ((IX5WebViewBase) f).getView().setOverScrollMode(View.OVER_SCROLL_NEVER);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        if (g instanceof View) {
+            ((View) g).setOverScrollMode(View.OVER_SCROLL_NEVER);
+        }
     }
 
     public MyDownloadListener getMyDownloadListener() {
