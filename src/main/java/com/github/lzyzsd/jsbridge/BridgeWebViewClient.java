@@ -36,7 +36,7 @@ public class BridgeWebViewClient extends WebViewClient {
             webView.flushMessageQueue();
             return true;
         } else {
-            return super.shouldOverrideUrlLoading(view, url);
+            return false;
         }
     }
 
@@ -58,10 +58,10 @@ public class BridgeWebViewClient extends WebViewClient {
                 webView.flushMessageQueue();
                 return true;
             } else {
-                return super.shouldOverrideUrlLoading(view, request);
+                return false;
             }
         } else {
-            return super.shouldOverrideUrlLoading(view, request);
+            return false;
         }
     }
 

@@ -229,10 +229,10 @@ public class X5WebView extends BridgeWebView implements IWebView {
     private WebViewClient client = new WebViewClient() {
         @Override
         public boolean shouldOverrideUrlLoading(WebView webView, String url) {
-            mBridgeWebViewClient.shouldOverrideUrlLoading(webView, url);
-
             L.e("call: shouldOverrideUrlLoading([webView, url])-> " + url + " title:" + webView.getTitle());
             RUtils.saveToSDCard("webview.log", "title:" + webView.getTitle() + " url:" + url);
+
+            mBridgeWebViewClient.shouldOverrideUrlLoading(webView, url);
 
             if (!TextUtils.isEmpty(url) && url.startsWith("http")) {
                 webView.loadUrl(url);
@@ -262,7 +262,8 @@ public class X5WebView extends BridgeWebView implements IWebView {
 
         @Override
         public boolean shouldOverrideUrlLoading(WebView webView, WebResourceRequest webResourceRequest) {
-            return mBridgeWebViewClient.shouldOverrideUrlLoading(webView, webResourceRequest);
+            mBridgeWebViewClient.shouldOverrideUrlLoading(webView, webResourceRequest);
+            return shouldOverrideUrlLoading(webView, webResourceRequest.getUrl().toString());
         }
 
         @Override
