@@ -17,6 +17,7 @@ import com.angcyo.uiview.base.UIIDialogImpl;
 import com.angcyo.uiview.container.ContentLayout;
 import com.angcyo.uiview.dialog.UIBottomItemDialog;
 import com.angcyo.uiview.dialog.UIDialog;
+import com.angcyo.uiview.dialog.UILoading;
 import com.angcyo.uiview.model.TitleBarItem;
 import com.angcyo.uiview.model.TitleBarPattern;
 import com.angcyo.uiview.recycler.RBaseViewHolder;
@@ -309,13 +310,30 @@ public class X5WebUIView extends UIContentView {
         mWebView.setOnOpenAppListener(new X5WebView.OnOpenAppListener() {
             @Override
             public void onOpenApp(final RUtils.QueryAppBean appBean) {
+                if (appBean.mAppInfo.packageName.contains("hn")) {
+                    mActivity.startActivity(appBean.startIntent);
+                    return;
+                }
+
                 UIDialog.build()
-                        .setDialogContent("请求打开应用")
+                        .setLayoutId(R.layout.base_dialog_open_app_layout)
+                        .setDialogContent("请求打开应用!")
                         .setOkText("打开")
-                        .setOkClick(new UIDialog.OnDialogClick() {
+                        .setOkListener(new View.OnClickListener() {
                             @Override
-                            public void onDialogClick(UIDialog dialog, View clickView) {
-                                mActivity.startActivity(appBean.startIntent);
+                            public void onClick(View v) {
+
+                                UILoading.flow(mParentILayout)
+                                        .setLoadingTipText("正在跳转...")
+                                        .setCanCancel(false)
+                                        .setDelayFinish(2000);
+
+                                postDelayed(160, new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        mActivity.startActivity(appBean.startIntent);
+                                    }
+                                });
                             }
                         })
                         .setOnInitDialogContent(new UIIDialogImpl.OnInitDialogContent() {
@@ -330,7 +348,10 @@ public class X5WebUIView extends UIContentView {
                                 topContentView.setGravity(Gravity.CENTER_HORIZONTAL);
                                 topContentView.setVisibility(View.VISIBLE);
                                 topContentView.setText(appBean.mAppInfo.appName);
-                                RTextView.setTopIco(topContentView, appBean.mAppInfo.appIcon);
+
+                                viewHolder.imageView(R.id.app_ico_view).setImageDrawable(appBean.mAppInfo.appIcon);
+
+                                //RTextView.setTopIco(topContentView, appBean.mAppInfo.appIcon);
                                 layoutParams = (LinearLayout.LayoutParams) topContentView.getLayoutParams();
                                 layoutParams.gravity = Gravity.CENTER_HORIZONTAL;
                                 topContentView.setLayoutParams(layoutParams);
