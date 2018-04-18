@@ -71,7 +71,7 @@ public class X5FileDownloadUIView extends UIIDialogRxImpl {
                     uiParam.getBundle().putBoolean("IS_DOWNLOAD", true);
                     finishIView(uiParam);
 
-                    if (RUtils.downLoadFile(mActivity, mDownloadFileBean.url) != -1) {
+                    if (RUtils.downLoadFile(mActivity, mDownloadFileBean.url, fileName) != -1) {
                         T_.show("开始下载:" + fileName);
                         //goBack();
                     }
