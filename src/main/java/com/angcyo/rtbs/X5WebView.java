@@ -260,11 +260,11 @@ public class X5WebView extends BridgeWebView implements IWebView {
             return true;
         }
 
-        @Override
-        public boolean shouldOverrideUrlLoading(WebView webView, WebResourceRequest webResourceRequest) {
-            mBridgeWebViewClient.shouldOverrideUrlLoading(webView, webResourceRequest);
-            return shouldOverrideUrlLoading(webView, webResourceRequest.getUrl().toString());
-        }
+//        @Override
+//        public boolean shouldOverrideUrlLoading(WebView webView, WebResourceRequest webResourceRequest) {
+//            mBridgeWebViewClient.shouldOverrideUrlLoading(webView, webResourceRequest);
+//            return shouldOverrideUrlLoading(webView, webResourceRequest.getUrl().toString());
+//        }
 
         @Override
         public void onPageStarted(WebView webView, String s, Bitmap bitmap) {
