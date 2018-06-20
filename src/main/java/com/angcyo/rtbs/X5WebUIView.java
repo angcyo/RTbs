@@ -1,5 +1,6 @@
 package com.angcyo.rtbs;
 
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.text.TextUtils;
@@ -12,6 +13,9 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.angcyo.library.utils.L;
+import com.angcyo.picker.media.OnMediaSelectorObserver;
+import com.angcyo.picker.media.RPicker;
+import com.angcyo.picker.media.bean.MediaItem;
 import com.angcyo.uiview.base.UIContentView;
 import com.angcyo.uiview.base.UIIDialogImpl;
 import com.angcyo.uiview.container.ContentLayout;
@@ -26,7 +30,13 @@ import com.angcyo.uiview.utils.RUtils;
 import com.angcyo.uiview.widget.EmptyView;
 import com.angcyo.uiview.widget.RTextView;
 import com.angcyo.uiview.widget.SimpleProgressBar;
+import com.tencent.smtt.sdk.ValueCallback;
 import com.tencent.smtt.sdk.WebView;
+
+import org.jetbrains.annotations.NotNull;
+
+import java.io.File;
+import java.util.List;
 
 /**
  * Copyright (C) 2016,深圳市红鸟网络科技股份有限公司 All rights reserved.
@@ -258,6 +268,22 @@ public class X5WebUIView extends UIContentView {
             @Override
             public void onProgressChanged(WebView webView, int progress) {
                 X5WebUIView.this.onProgressChanged(webView, progress);
+            }
+
+            @Override
+            public boolean onOpenFileChooser(final ValueCallback<Uri> uploadFile, String acceptType, String captureType) {
+                if (!TextUtils.isEmpty(acceptType)) {
+                    if (acceptType.startsWith("image")) {
+                        RPicker.INSTANCE.pickerImage(mParentILayout, 1, new OnMediaSelectorObserver() {
+                            @Override
+                            public void onMediaSelector(@NotNull List<MediaItem> mediaItemList) {
+                                uploadFile.onReceiveValue(Uri.fromFile(new File(mediaItemList.get(0).getPath())));
+                            }
+                        });
+                        return true;
+                    }
+                }
+                return false;
             }
         });
 

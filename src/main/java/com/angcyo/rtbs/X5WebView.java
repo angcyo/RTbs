@@ -7,6 +7,7 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.net.Uri;
 import android.os.Message;
+import android.support.annotation.NonNull;
 import android.support.v4.view.MotionEventCompat;
 import android.text.TextUtils;
 import android.util.AttributeSet;
@@ -105,13 +106,22 @@ public class X5WebView extends BridgeWebView implements IWebView {
         public boolean onShowFileChooser(WebView arg0,
                                          ValueCallback<Uri[]> arg1, FileChooserParams arg2) {
             // TODO Auto-generated method stub
-            //Log.e("app", "onShowFileChooser");
+            L.e("X5WebView", "onShowFileChooser " + arg2);
+            //返回true之后, openFileChooser 就不会被执行
+            if (arg2 != null) {
+                if (arg2.getAcceptTypes() == null ||
+                        arg2.getAcceptTypes().length == 0 ||
+                        TextUtils.isEmpty(arg2.getAcceptTypes()[0])) {
+                    L.e("X5WebView", "onShowFileChooser 不支持的操作");
+                    return true;
+                }
+            }
             return super.onShowFileChooser(arg0, arg1, arg2);
         }
 
         @Override
         public void openFileChooser(ValueCallback<Uri> uploadFile, String acceptType, String captureType) {
-//            Log.e("app", "openFileChooser");
+            L.e("X5WebView", "openFileChooser " + acceptType + " " + captureType);
 //            Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
 //            intent.setType("*/*");
 //            intent.addCategory(Intent.CATEGORY_OPENABLE);
@@ -121,7 +131,11 @@ public class X5WebView extends BridgeWebView implements IWebView {
 //            } catch (android.content.ActivityNotFoundException ex) {
 //
 //            }
-
+            if (mOnWebViewListener != null) {
+                if (mOnWebViewListener.onOpenFileChooser(uploadFile, acceptType, captureType)) {
+                    return;
+                }
+            }
             super.openFileChooser(uploadFile, acceptType, captureType);
         }
 
@@ -720,11 +734,13 @@ public class X5WebView extends BridgeWebView implements IWebView {
 
         void onOverScroll(int scrollY);
 
-        void onPageFinished(WebView webView, String url);
+        void onPageFinished(@NonNull WebView webView, String url);
 
-        void onReceivedTitle(WebView webView, final String title);
+        void onReceivedTitle(@NonNull WebView webView, final String title);
 
-        void onProgressChanged(WebView webView, int progress);
+        void onProgressChanged(@NonNull WebView webView, int progress);
+
+        boolean onOpenFileChooser(@NonNull ValueCallback<Uri> uploadFile, String acceptType, String captureType);
     }
 
     public interface MyDownloadListener {
