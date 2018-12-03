@@ -12,24 +12,7 @@ import android.view.WindowManager;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import com.angcyo.library.utils.L;
-import com.angcyo.picker.media.OnMediaSelectorObserver;
-import com.angcyo.picker.media.RPicker;
-import com.angcyo.picker.media.bean.MediaItem;
-import com.angcyo.uiview.base.UIContentView;
-import com.angcyo.uiview.base.UIIDialogImpl;
-import com.angcyo.uiview.container.ContentLayout;
-import com.angcyo.uiview.dialog.UIBottomItemDialog;
-import com.angcyo.uiview.dialog.UIDialog;
-import com.angcyo.uiview.dialog.UILoading;
-import com.angcyo.uiview.model.TitleBarItem;
-import com.angcyo.uiview.model.TitleBarPattern;
-import com.angcyo.uiview.recycler.RBaseViewHolder;
-import com.angcyo.uiview.rsen.RefreshLayout;
-import com.angcyo.uiview.utils.RUtils;
-import com.angcyo.uiview.widget.EmptyView;
-import com.angcyo.uiview.widget.RTextView;
-import com.angcyo.uiview.widget.SimpleProgressBar;
+import com.angcyo.uiview.less.widget.SimpleProgressBar;
 import com.tencent.smtt.sdk.ValueCallback;
 import com.tencent.smtt.sdk.WebView;
 

@@ -1,6 +1,6 @@
-apply from: '../RLibrary/lib.gradle'
+apply from: '../lib/lib_base.gradle'
 
 dependencies {
     api fileTree(include: ['*.jar'], dir: 'libs')
-    api project(':RLibrary:uiview')
+    compileOnly project(":UIViewLess")
 }
