@@ -56,7 +56,6 @@ public class X5WebViewEventHandler extends ProxyWebViewClientExtension implement
             webView.tbs_computeScroll(view);
         }
 
-
         @Override
         public void onOverScrolled(int scrollX, int scrollY, boolean clampedX,
                                    boolean clampedY, View view) {
@@ -243,16 +242,19 @@ public class X5WebViewEventHandler extends ProxyWebViewClientExtension implement
     }
 
     // 1
+    @Override
     public boolean onInterceptTouchEvent(MotionEvent ev, View view) {
         return callbackClient.onInterceptTouchEvent(ev, view);
     }
 
     // 3
+    @Override
     public boolean dispatchTouchEvent(MotionEvent ev, View view) {
         return callbackClient.dispatchTouchEvent(ev, view);
     }
 
     // 4
+    @Override
     public boolean overScrollBy(int deltaX, int deltaY, int scrollX, int scrollY,
                                 int scrollRangeX, int scrollRangeY,
                                 int maxOverScrollX, int maxOverScrollY,
@@ -262,17 +264,20 @@ public class X5WebViewEventHandler extends ProxyWebViewClientExtension implement
     }
 
     // 5
+    @Override
     public void onScrollChanged(int l, int t, int oldl, int oldt, View view) {
         callbackClient.onScrollChanged(l, t, oldl, oldt, view);
     }
 
     // 6
+    @Override
     public void onOverScrolled(int scrollX, int scrollY, boolean clampedX,
                                boolean clampedY, View view) {
         callbackClient.onOverScrolled(scrollX, scrollY, clampedX, clampedY, view);
     }
 
     // 7
+    @Override
     public void computeScroll(View view) {
         callbackClient.computeScroll(view);
     }

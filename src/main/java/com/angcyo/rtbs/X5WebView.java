@@ -16,10 +16,10 @@ import android.view.View;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import com.angcyo.library.utils.L;
-import com.angcyo.uiview.design.IWebView;
-import com.angcyo.uiview.utils.RUtils;
-import com.angcyo.uiview.utils.Reflect;
+import com.angcyo.lib.L;
+import com.angcyo.uiview.less.utils.RUtils;
+import com.angcyo.uiview.less.utils.Reflect;
+import com.angcyo.uiview.less.widget.IWebView;
 import com.github.lzyzsd.jsbridge.BridgeWebView;
 import com.tencent.smtt.export.external.interfaces.ClientCertRequest;
 import com.tencent.smtt.export.external.interfaces.IX5WebChromeClient.CustomViewCallback;
@@ -55,8 +55,6 @@ public class X5WebView extends BridgeWebView implements IWebView {
     Paint mPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
     private String resourceUrl = "";
     private WebView smallWebView;
-    private boolean isClampedY = true;
-    private boolean isStopInTop = true;//页面在顶部, 没有滚动过
     private Map<String, Object> mJsBridges;
     private TextView tog;
     private RelativeLayout refreshRela;
@@ -234,9 +232,16 @@ public class X5WebView extends BridgeWebView implements IWebView {
             }
         }
     };
-    private int mScrollY = 0;//Y轴滚动的距离, 用来下拉刷新判断使用
+
+    /**
+     * Y轴滚动的距离, 用来下拉刷新判断使用
+     */
+    private int scrollY = 0;
+    /**
+     * 手指按下的坐标
+     */
     private float mDownY;
-    private boolean isScrollToBottom = false;//手指向下
+
     private int mLastDeltaY;
     private MyDownloadListener mDownloadListener;
     private OnOpenAppListener mOnOpenAppListener;
@@ -246,10 +251,18 @@ public class X5WebView extends BridgeWebView implements IWebView {
             L.e("call: shouldOverrideUrlLoading([webView, url])-> " + url + " title:" + webView.getTitle());
             RUtils.saveToSDCard("webview.log", "title:" + webView.getTitle() + " url:" + url);
 
+            if (mOnWebViewListener != null) {
+                mOnWebViewListener.shouldOverrideUrlLoading(webView, url);
+            }
+
             mBridgeWebViewClient.shouldOverrideUrlLoading(webView, url);
 
             if (!TextUtils.isEmpty(url) && url.startsWith("http")) {
                 webView.loadUrl(url);
+
+                //切换网页后, 重置
+                lastMoveDy = 0;
+                touchMoveDy = 0;
             } else if (!TextUtils.isEmpty(url)) {
                 //RUtils.openAppFromUrl(getContext(), url);
 
@@ -472,7 +485,7 @@ public class X5WebView extends BridgeWebView implements IWebView {
         // webSetting.setPageCacheCapacity(IX5WebSettings.DEFAULT_CACHE_CAPACITY);
         webSetting.setPluginState(WebSettings.PluginState.ON_DEMAND);
 
-        webSetting.setUserAgent(webSetting.getUserAgentString() + " KLG_Android");
+        webSetting.setUserAgent(webSetting.getUserAgentString() + " angcyo");
 
         // webSetting.setRenderPriority(WebSettings.RenderPriority.HIGH);
         // webSetting.setPreFectch(true);
@@ -525,10 +538,43 @@ public class X5WebView extends BridgeWebView implements IWebView {
         }
     }
 
+    /**
+     * 记录最后一次手势移动的距离
+     */
+    float lastMoveDy = 0;
+
+    float touchMoveDy = 0;
+
     // TBS: Do not use @Override to avoid false calls
-    public boolean tbs_dispatchTouchEvent(MotionEvent ev, View view) {
-        boolean r = super.super_dispatchTouchEvent(ev);
-//        Log.d("Bran", "dispatchTouchEvent " + ev.getAction() + " " + r);
+    public boolean tbs_dispatchTouchEvent(MotionEvent event, View view) {
+        int actionMasked = MotionEventCompat.getActionMasked(event);
+        if (actionMasked == MotionEvent.ACTION_DOWN) {
+            mDownY = event.getY();
+        } else if (actionMasked == MotionEvent.ACTION_MOVE) {
+            float eventY = event.getY();
+            float dy = mDownY - eventY;
+            touchMoveDy = dy;
+
+            if (dy < 0) {
+                //本次向下滚动
+                if (scrollY == 0) {
+                    //H5内嵌滚动条判断
+                    if (lastMoveDy > 0) {
+                        //曾经向上滚动过
+
+                    } else {
+                        lastMoveDy = dy;
+                    }
+                } else {
+                    lastMoveDy = dy;
+                }
+            } else {
+                lastMoveDy = dy;
+            }
+        } else if (actionMasked == MotionEvent.ACTION_UP) {
+        }
+        boolean r = super.super_dispatchTouchEvent(event);
+        L.d("Bran", "dispatchTouchEvent " + event.getAction() + " " + r);
         return r;
     }
 
@@ -540,7 +586,6 @@ public class X5WebView extends BridgeWebView implements IWebView {
 
     protected void tbs_onScrollChanged(int l, int t, int oldl, int oldt, View view) {
         super_onScrollChanged(l, t, oldl, oldt);
-
         if (mOnWebViewListener != null) {
             mOnWebViewListener.onScroll(l, t, l - oldl, t - oldt);
         }
@@ -566,18 +611,22 @@ public class X5WebView extends BridgeWebView implements IWebView {
 //                this.isClampedY = false;
 //            }
 //        }
-        this.isClampedY = clampedY && scrollY == 0 && isScrollToBottom;
-        isStopInTop = clampedY && scrollY == 0 && mLastDeltaY < 0;
-//        L.e("call: tbs_onOverScrolled([scrollX, scrollY, clampedX, clampedY, view])-> " + scrollY + " " + clampedY);
+//        this.isClampedY = clampedY && scrollY == 0 && isScrollToBottom;
+//        isStopInTop = /*clampedY &&*/ scrollY == 0 /*&& mLastDeltaY <= 0;*/;
+//        L.e("tbs_onOverScrolled()-> " + scrollY + " " + clampedY + " " + mLastDeltaY);
+
+        this.scrollY = scrollY;
+        if (scrollY == 0) {
+            //H5内嵌滚动条, 不管滚动到顶部和底部, scrollY 都是0
+            if (touchMoveDy < 0) {
+                //本次滚到0, 是由手指向下滚动触发的.
+                lastMoveDy = 0;
+            }
+        }
+
         super_onOverScrolled(scrollX, scrollY, clampedX, clampedY);
     }
 
-    /**
-     * 顶部是否还可以滚动
-     */
-    public boolean canTopScroll() {
-        return !isClampedY;
-    }
 
     protected void tbs_computeScroll(View view) {
         super_computeScroll();
@@ -586,8 +635,11 @@ public class X5WebView extends BridgeWebView implements IWebView {
     /**
      * 当WebView滚动了多少距离时, 回调
      */
-    protected boolean tbs_overScrollBy(int deltaX, int deltaY, int scrollX, int scrollY, int scrollRangeX,
-                                       int scrollRangeY, int maxOverScrollX, int maxOverScrollY, boolean isTouchEvent, View view) {
+    protected boolean tbs_overScrollBy(int deltaX, int deltaY, /*本次滚动多少距离*/
+                                       int scrollX, int scrollY, /*总共滚动了多少距离*/
+                                       int scrollRangeX, int scrollRangeY, /*滚动的范围*/
+                                       int maxOverScrollX, int maxOverScrollY,/**/
+                                       boolean isTouchEvent, View view) {
 //        if (getContext() instanceof RefreshActivity) {
 //            if (this.isClampedY) {
 //                if ((refreshRela.getTop() + (-deltaY)) / 2 < 255) {
@@ -601,16 +653,17 @@ public class X5WebView extends BridgeWebView implements IWebView {
 //            }
 //        }
 
-        mScrollY = scrollY;
-        mLastDeltaY = deltaY;
-
         if (scrollY == 0) {
             if (mOnWebViewListener != null) {
                 mOnWebViewListener.onOverScroll(deltaY);
             }
         }
-        return super_overScrollBy(deltaX, deltaY, scrollX, scrollY, scrollRangeX, scrollRangeY, maxOverScrollX,
+        boolean overScrollBy = super_overScrollBy(deltaX, deltaY, scrollX, scrollY, scrollRangeX, scrollRangeY, maxOverScrollX,
                 maxOverScrollY, isTouchEvent);
+
+        //L.e("tbs_overScrollBy()-> " + deltaY + " " + scrollY + " " + scrollRangeY + " " + maxOverScrollY + " " + overScrollBy);
+
+        return overScrollBy;
     }
 
     protected boolean tbs_onTouchEvent(MotionEvent event, View view) {
@@ -625,20 +678,6 @@ public class X5WebView extends BridgeWebView implements IWebView {
 //        }
 //        resetOverScrollMode();
 
-        int actionMasked = MotionEventCompat.getActionMasked(event);
-        if (actionMasked == MotionEvent.ACTION_DOWN) {
-            mDownY = event.getY();
-        } else if (actionMasked == MotionEvent.ACTION_MOVE) {
-            float eventY = event.getY();
-            isStopInTop = false;
-            if (mDownY != eventY) {
-                isClampedY = false;
-            }
-            isScrollToBottom = eventY > mDownY;
-        } else if (actionMasked == MotionEvent.ACTION_UP) {
-            isClampedY = false;
-            isScrollToBottom = false;
-        }
         boolean touchEvent = super_onTouchEvent(event);
 //        L.e("call: tbs_onTouchEvent([event, view])-> " + touchEvent);
         return touchEvent;
@@ -656,8 +695,21 @@ public class X5WebView extends BridgeWebView implements IWebView {
         this.title = title;
     }
 
-    public boolean isStopInTop() {
-        return isStopInTop;
+    /**
+     * 顶部是否还可以滚动, 顶部是否还有距离滚动可以滚动
+     */
+    public boolean topCanScroll() {
+        if (scrollY == 0) {
+            //未滚动, 有2中情况.
+            //1:真的是没有滚动
+            //2:H5内嵌的滚动
+            if (lastMoveDy > 0) {
+                //针对第二种情况, 只要手指曾经向上滚动过, 就认为top不可以滚动
+                return true;
+            }
+            return false;
+        }
+        return true;
     }
 
     @Override
@@ -741,6 +793,8 @@ public class X5WebView extends BridgeWebView implements IWebView {
         void onProgressChanged(@NonNull WebView webView, int progress);
 
         boolean onOpenFileChooser(@NonNull ValueCallback<Uri> uploadFile, String acceptType, String captureType);
+
+        void shouldOverrideUrlLoading(WebView webView, String url);
     }
 
     public interface MyDownloadListener {
