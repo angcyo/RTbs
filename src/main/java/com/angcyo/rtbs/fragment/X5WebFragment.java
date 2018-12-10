@@ -14,6 +14,7 @@ import com.angcyo.lib.L;
 import com.angcyo.rtbs.*;
 import com.angcyo.uiview.less.base.BaseTitleFragment;
 import com.angcyo.uiview.less.base.TitleItemHelper;
+import com.angcyo.uiview.less.utils.RSheetDialog;
 import com.angcyo.uiview.less.utils.RUtils;
 import com.angcyo.uiview.less.widget.EmptyView;
 import com.angcyo.uiview.less.widget.SimpleProgressBar;
@@ -108,16 +109,31 @@ public class X5WebFragment extends BaseTitleFragment {
         super.initBaseTitleLayout(arguments);
         setTitleString("加载中...");
 
-//        //更多按钮
-//        rightControl()
-//                .addView(TitleItemHelper.createItem(mAttachContext, R.drawable.base_more, new View.OnClickListener() {
-//                    @Override
-//                    public void onClick(View v) {
-//                        BottomSheetDialog sheetDialog = new BottomSheetDialog(mAttachContext);
-//
-//                        sheetDialog.show();
-//                    }
-//                }));
+        //更多按钮
+        rightControl()
+                .addView(TitleItemHelper.createItem(mAttachContext, R.drawable.base_more, new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        RSheetDialog.build(mAttachContext)
+                                .addItem("在浏览器中打开", new View.OnClickListener() {
+                                    @Override
+                                    public void onClick(View v) {
+                                        if (mWebView != null) {
+                                            RUtils.openUrl(mAttachContext, mWebView.getUrl());
+                                        }
+                                    }
+                                })
+                                .addItem("刷新", new View.OnClickListener() {
+                                    @Override
+                                    public void onClick(View v) {
+                                        if (mWebView != null) {
+                                            mWebView.reload();
+                                        }
+                                    }
+                                })
+                                .show();
+                    }
+                }));
     }
 
     @Override
