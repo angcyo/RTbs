@@ -1,12 +1,24 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-
-          package="com.angcyo.rtbs"
-    >
+          package="com.angcyo.rtbs">
 
     <application
-        android:allowBackup="true"
-        android:supportsRtl="true"
-        >
+            android:allowBackup="true"
+            android:supportsRtl="true">
+
+        <!--https://x5.tencent.com/tbs/guide/sdkInit.html-->
+        <activity
+                android:name="com.tencent.smtt.sdk.VideoActivity"
+                android:configChanges="orientation|screenSize|keyboardHidden"
+                android:exported="false"
+                android:launchMode="singleTask"
+                android:alwaysRetainTaskState="true">
+
+            <intent-filter>
+                <action android:name="com.tencent.smtt.tbs.video.PLAY"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+            </intent-filter>
+
+        </activity>
 
     </application>
 

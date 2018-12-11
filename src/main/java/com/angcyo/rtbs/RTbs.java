@@ -1,9 +1,11 @@
 package com.angcyo.rtbs;
 
 import android.content.Context;
-
 import com.angcyo.lib.L;
 import com.tencent.smtt.sdk.QbSdk;
+
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 /**
  * Created by angcyo on 2018/04/06 17:31
@@ -23,6 +25,7 @@ public class RTbs {
                     L.i("腾讯X5 onViewInitFinished:" + b);
                 }
             });
+
         } catch (Exception e) {
             L.i("腾讯X5 " + e.getMessage());
             e.printStackTrace();
