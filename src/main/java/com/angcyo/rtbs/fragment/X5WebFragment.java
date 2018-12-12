@@ -57,6 +57,11 @@ public class X5WebFragment extends BaseTitleFragment {
      */
     private String downloadUrl = "";
 
+    /**
+     * 界面加载是否完成
+     */
+    public boolean isPageLoadFinish = false;
+
     public static String createJSParams(String data, int result) {
         StringBuilder builder = new StringBuilder();
         builder.append("'{");
@@ -250,7 +255,7 @@ public class X5WebFragment extends BaseTitleFragment {
      * 创建关闭按钮
      */
     protected View createCloseItem() {
-        return new TitleItemHelper.Builder(mAttachContext)
+        return TitleItemHelper.build(mAttachContext)
                 .setSrc(R.drawable.base_close)
                 .setClickListener(new View.OnClickListener() {
                     @Override
@@ -531,6 +536,9 @@ public class X5WebFragment extends BaseTitleFragment {
 
     protected void onLoadUrl() {
         L.i("call: onLoadUrl([])-> 加载网页:" + mTargetUrl);
+
+        isPageLoadFinish = false;
+
         mWebView.loadUrl(mTargetUrl);
         mProgressBarView.setProgress(10);
 
@@ -539,6 +547,8 @@ public class X5WebFragment extends BaseTitleFragment {
     }
 
     protected void onPageFinished(WebView webView, String url) {
+        isPageLoadFinish = true;
+
         if (mWebCallback != null) {
             mWebCallback.onPageFinished(webView, url);
         }
