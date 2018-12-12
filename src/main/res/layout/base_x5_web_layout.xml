@@ -45,6 +45,7 @@
     <com.angcyo.uiview.less.widget.SimpleProgressBar
             android:id="@+id/progress_bar_view"
             android:layout_width="match_parent"
+            app:r_progress_gradient="true"
             android:layout_height="wrap_content"/>
 
     <com.angcyo.uiview.less.widget.RTextView

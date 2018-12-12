@@ -574,7 +574,7 @@ public class X5WebView extends BridgeWebView implements IWebView {
         } else if (actionMasked == MotionEvent.ACTION_UP) {
         }
         boolean r = super.super_dispatchTouchEvent(event);
-        L.d("Bran", "dispatchTouchEvent " + event.getAction() + " " + r);
+        //L.d("Bran", "dispatchTouchEvent " + event.getAction() + " " + r);
         return r;
     }
 

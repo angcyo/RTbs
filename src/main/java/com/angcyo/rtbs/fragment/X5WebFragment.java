@@ -1,5 +1,6 @@
 package com.angcyo.rtbs.fragment;
 
+import android.app.Activity;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -8,11 +9,13 @@ import android.text.TextUtils;
 import android.view.View;
 import android.view.WindowManager;
 
+import android.widget.ImageView;
 import android.widget.TextView;
 import com.angcyo.lib.L;
 import com.angcyo.rtbs.*;
 import com.angcyo.uiview.less.base.BaseTitleFragment;
 import com.angcyo.uiview.less.base.helper.TitleItemHelper;
+import com.angcyo.uiview.less.resources.ResUtil;
 import com.angcyo.uiview.less.utils.RSheetDialog;
 import com.angcyo.uiview.less.utils.RUtils;
 import com.angcyo.uiview.less.widget.EmptyView;
@@ -107,7 +110,12 @@ public class X5WebFragment extends BaseTitleFragment {
     protected void initBaseTitleLayout(@Nullable Bundle arguments) {
         super.initBaseTitleLayout(arguments);
         setTitleString("加载中...");
+    }
 
+    /**
+     * 默认菜单
+     */
+    public void addDefaultMenu() {
         //更多按钮
         rightControl()
                 .addView(TitleItemHelper.createItem(mAttachContext, R.drawable.base_more, new View.OnClickListener() {
@@ -229,6 +237,31 @@ public class X5WebFragment extends BaseTitleFragment {
     @Override
     protected int getContentLayoutId() {
         return R.layout.base_x5_web_layout;
+    }
+
+    @Override
+    protected void initLeftControlLayout() {
+        super.initLeftControlLayout();
+        addLeftItem(createCloseItem());
+    }
+
+
+    /**
+     * 创建关闭按钮
+     */
+    protected View createCloseItem() {
+        return new TitleItemHelper.Builder(mAttachContext)
+                .setSrc(R.drawable.base_close)
+                .setClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        backFragment(false);
+                    }
+                })
+                .setLeftMargin((int) ResUtil.dpToPx(-20))
+                .setVisibility(View.GONE)
+                .setViewId(R.id.base_title_close_view)
+                .build();
     }
 
     @Override
@@ -510,9 +543,9 @@ public class X5WebFragment extends BaseTitleFragment {
             mWebCallback.onPageFinished(webView, url);
         }
         if (mWebView.canGoBack()) {
-//            getUITitleBarContainer().showLeftItem(2);
+            leftControl().selector(R.id.base_title_close_view).visible();
         } else {
-//            getUITitleBarContainer().hideLeftItem(2);
+            leftControl().selector(R.id.base_title_close_view).gone();
         }
         //L.e("call: onPageFinished([webView, url])-> ");
     }
@@ -550,19 +583,19 @@ public class X5WebFragment extends BaseTitleFragment {
         mWebView.destroy();
     }
 
-//    @Override
-//    public boolean onBackPressed() {
-//        if (mWebView != null && mWebView.canGoBack()) {
-//            mWebView.goBack();
-//            if (mWebView.canGoBack()) {
-//                getUITitleBarContainer().showLeftItem(2);
-//            } else {
-//                getUITitleBarContainer().hideLeftItem(2);
-//            }
-//            return false;
-//        }
-//        return true;
-//    }
+    @Override
+    public boolean onBackPressed(@NonNull Activity activity) {
+        if (mWebView != null && mWebView.canGoBack()) {
+            mWebView.goBack();
+            if (mWebView.canGoBack()) {
+                leftControl().selector(R.id.base_title_close_view).visible();
+            } else {
+                leftControl().selector(R.id.base_title_close_view).gone();
+            }
+            return false;
+        }
+        return true;
+    }
 
     public X5WebFragment setWebCallback(WebCallback webCallback) {
         mWebCallback = webCallback;
