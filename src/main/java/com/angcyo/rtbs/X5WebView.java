@@ -181,9 +181,9 @@ public class X5WebView extends BridgeWebView implements IWebView {
             /**
              * 这里写入你自定义的window alert
              */
-            // AlertDialog.Builder builder = new Builder(getContext());
-            // builder.setTitle("X5内核");
-            // builder.setPositiveButton("确定", new
+            // AlertDialog.Builder build = new Builder(getContext());
+            // build.setTitle("X5内核");
+            // build.setPositiveButton("确定", new
             // DialogInterface.OnClickListener() {
             //
             // @Override
@@ -192,7 +192,7 @@ public class X5WebView extends BridgeWebView implements IWebView {
             // dialog.dismiss();
             // }
             // });
-            // builder.show();
+            // build.show();
             // arg3.confirm();
             // return true;
             //Log.i("yuanhaizhou", "setX5webview = null");
