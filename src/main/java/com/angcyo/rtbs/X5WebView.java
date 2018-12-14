@@ -15,29 +15,16 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-
 import com.angcyo.lib.L;
 import com.angcyo.uiview.less.utils.RUtils;
 import com.angcyo.uiview.less.utils.Reflect;
 import com.angcyo.uiview.less.widget.IWebView;
 import com.github.lzyzsd.jsbridge.BridgeWebView;
-import com.tencent.smtt.export.external.interfaces.ClientCertRequest;
+import com.tencent.smtt.export.external.interfaces.*;
 import com.tencent.smtt.export.external.interfaces.IX5WebChromeClient.CustomViewCallback;
-import com.tencent.smtt.export.external.interfaces.IX5WebViewBase;
-import com.tencent.smtt.export.external.interfaces.JsPromptResult;
-import com.tencent.smtt.export.external.interfaces.JsResult;
-import com.tencent.smtt.export.external.interfaces.WebResourceError;
-import com.tencent.smtt.export.external.interfaces.WebResourceRequest;
-import com.tencent.smtt.export.external.interfaces.WebResourceResponse;
-import com.tencent.smtt.sdk.CookieManager;
-import com.tencent.smtt.sdk.CookieSyncManager;
+import com.tencent.smtt.sdk.*;
 import com.tencent.smtt.sdk.DownloadListener;
-import com.tencent.smtt.sdk.ValueCallback;
-import com.tencent.smtt.sdk.WebChromeClient;
-import com.tencent.smtt.sdk.WebSettings;
 import com.tencent.smtt.sdk.WebSettings.LayoutAlgorithm;
-import com.tencent.smtt.sdk.WebView;
-import com.tencent.smtt.sdk.WebViewClient;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -58,8 +45,22 @@ public class X5WebView extends BridgeWebView implements IWebView {
     private Map<String, Object> mJsBridges;
     private TextView tog;
     private RelativeLayout refreshRela;
+
+    /**
+     * Y轴滚动的距离, 用来下拉刷新判断使用
+     */
+    private int scrollY = 0;
+    /**
+     * 手指按下的坐标
+     */
+    private float mDownY;
+
+    private int mLastDeltaY;
+    private MyDownloadListener mDownloadListener;
+    private OnOpenAppListener mOnOpenAppListener;
     private OnWebViewListener mOnWebViewListener;
-    private WebChromeClient chromeClient = new WebChromeClient() {
+
+    private WebChromeClient webChromeClient = new WebChromeClient() {
 
         View myVideoView;
         View myNormalView;
@@ -233,19 +234,7 @@ public class X5WebView extends BridgeWebView implements IWebView {
         }
     };
 
-    /**
-     * Y轴滚动的距离, 用来下拉刷新判断使用
-     */
-    private int scrollY = 0;
-    /**
-     * 手指按下的坐标
-     */
-    private float mDownY;
-
-    private int mLastDeltaY;
-    private MyDownloadListener mDownloadListener;
-    private OnOpenAppListener mOnOpenAppListener;
-    private WebViewClient client = new WebViewClient() {
+    private WebViewClient webViewClient = new WebViewClient() {
         @Override
         public boolean shouldOverrideUrlLoading(WebView webView, String url) {
             L.e("call: shouldOverrideUrlLoading([webView, url])-> " + url + " title:" + webView.getTitle());
@@ -384,9 +373,10 @@ public class X5WebView extends BridgeWebView implements IWebView {
         //setBackgroundColor(85621);
         //setOverScrollMode(View.OVER_SCROLL_NEVER);
 
-        this.setWebViewClientExtension(new X5WebViewEventHandler(this));// 配置X5webview的事件处理
-        this.setWebViewClient(client);
-        this.setWebChromeClient(chromeClient);
+        // 配置X5webview的事件处理
+        this.setWebViewClientExtension(new X5WebViewEventHandler(this));
+        this.setWebViewClient(webViewClient);
+        this.setWebChromeClient(webChromeClient);
         //WebStorage webStorage = WebStorage.getInstance();
         initWebViewSettings();
         this.getView().setClickable(true);

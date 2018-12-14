@@ -8,13 +8,17 @@ import android.support.annotation.Nullable;
 import android.text.TextUtils;
 import android.view.View;
 import android.view.WindowManager;
-
-import android.widget.ImageView;
 import android.widget.TextView;
 import com.angcyo.lib.L;
-import com.angcyo.rtbs.*;
+import com.angcyo.rtbs.AndroidJs;
+import com.angcyo.rtbs.DownloadFileBean;
+import com.angcyo.rtbs.R;
+import com.angcyo.rtbs.X5WebView;
+import com.angcyo.rtbs.dialog.FileDownloadDialog;
+import com.angcyo.rtbs.dialog.OpenAppDialog;
 import com.angcyo.uiview.less.base.BaseTitleFragment;
 import com.angcyo.uiview.less.base.helper.TitleItemHelper;
+import com.angcyo.uiview.less.recycler.RBaseViewHolder;
 import com.angcyo.uiview.less.resources.ResUtil;
 import com.angcyo.uiview.less.utils.RSheetDialog;
 import com.angcyo.uiview.less.utils.RUtils;
@@ -38,20 +42,60 @@ import com.tencent.smtt.sdk.WebView;
  */
 public class X5WebFragment extends BaseTitleFragment {
 
+
+    //<editor-fold desc="定制界面的扩展参数">
+
     /**
+     * 扩展参数:
      * 目标url
      */
     public static final String KEY_TARGET_URL = "key_target_url";
+    /**
+     * 扩展参数:
+     * 浮动的标题栏, 开启会自动设置透明标题栏, 和 内核提示的padding
+     */
+    public static final String KEY_FLOAT_TITLE_BAR = "key_float_title_bar";
+
+    /**
+     * 扩展参数:
+     * 隐藏默认的标题
+     */
+    public static final String KEY_HIDE_TITLE = "key_hide_title";
+
+    /**
+     * 扩展参数:
+     * 显示默认的菜单按钮
+     */
+    public static final String KEY_SHOW_DEFAULT_MENU = "key_show_default_menu";
+
+    //</editor-fold>
+
+    //<editor-fold desc="界面特性成员变量">
+
+    /**
+     * 需要打开的url
+     */
+    protected String mTargetUrl;
+    protected boolean floatTitleBar = false;
+    protected boolean hideTitle = false;
+
+    /**
+     * 显示默认的菜单按钮
+     */
+    protected boolean showDefaultMenu = true;
+
+    //</editor-fold>
 
     protected X5WebView mWebView;
-    protected String mTargetUrl;
-    SimpleProgressBar mProgressBarView;
-    EmptyView mEmptyView;
-    WebCallback mWebCallback;
-    private int mSoftInputMode;
-    private SmartRefreshLayout mRefreshLayout;
+    protected SimpleProgressBar mProgressBarView;
+    protected EmptyView mEmptyView;
+    protected WebCallback mWebCallback;
+    protected SmartRefreshLayout mRefreshLayout;
 
-    private boolean showDefaultMenu = true;
+    //<editor-fold desc="界面状态成员变量">
+
+    private int mSoftInputMode;
+
     /**
      * 正在处理的下载链接
      */
@@ -62,31 +106,8 @@ public class X5WebFragment extends BaseTitleFragment {
      */
     public boolean isPageLoadFinish = false;
 
-    public static String createJSParams(String data, int result) {
-        StringBuilder builder = new StringBuilder();
-        builder.append("'{");
+    //</editor-fold>
 
-        builder.append("\"");
-        if (result > 0) {
-            builder.append("data");
-        } else {
-            builder.append("error");
-        }
-
-        builder.append("\"");
-        builder.append(":");
-        builder.append(data);
-        builder.append(",");
-
-        builder.append("\"");
-        builder.append("result");
-        builder.append("\"");
-        builder.append(":");
-        builder.append(result);
-
-        builder.append("}'");
-        return builder.toString();
-    }
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -95,6 +116,9 @@ public class X5WebFragment extends BaseTitleFragment {
         Bundle arguments = getArguments();
         if (arguments != null) {
             mTargetUrl = arguments.getString(KEY_TARGET_URL);
+            showDefaultMenu = arguments.getBoolean(KEY_SHOW_DEFAULT_MENU, showDefaultMenu);
+            hideTitle = arguments.getBoolean(KEY_HIDE_TITLE, hideTitle);
+            floatTitleBar = arguments.getBoolean(KEY_FLOAT_TITLE_BAR, floatTitleBar);
         }
 
         //        String encode = targetUrl;
@@ -112,9 +136,46 @@ public class X5WebFragment extends BaseTitleFragment {
     }
 
     @Override
+    protected void onInitBaseView(@NonNull RBaseViewHolder viewHolder,
+                                  @Nullable Bundle arguments,
+                                  @Nullable Bundle savedInstanceState) {
+        super.onInitBaseView(viewHolder, arguments, savedInstanceState);
+    }
+
+    @Override
     protected void initBaseTitleLayout(@Nullable Bundle arguments) {
         super.initBaseTitleLayout(arguments);
         setTitleString("加载中...");
+        if (hideTitle) {
+            hideTitleView();
+        }
+        if (floatTitleBar) {
+            floatTitleBar();
+            TextView headerView = baseViewHolder.v(R.id.base_web_header_view);
+            if (headerView != null) {
+                headerView.setPadding(headerView.getPaddingLeft(),
+                        (int) (headerView.getPaddingTop() + ResUtil.dpToPx(65)),
+                        headerView.getPaddingRight(),
+                        headerView.getPaddingBottom());
+            }
+
+            if (mRefreshLayout == null) {
+                mRefreshLayout = baseViewHolder.v(R.id.base_refresh_layout);
+            }
+            if (mRefreshLayout != null) {
+                //mRefreshLayout.setHeaderMaxDragRate(4f);
+                //mRefreshLayout.setHeaderTriggerRate(4f);
+                mRefreshLayout.setHeaderHeight(200);
+            }
+        }
+    }
+
+    @Override
+    protected void initRightControlLayout() {
+        super.initRightControlLayout();
+        if (showDefaultMenu) {
+            addDefaultMenu();
+        }
     }
 
     /**
@@ -133,6 +194,12 @@ public class X5WebFragment extends BaseTitleFragment {
                                         if (mWebView != null) {
                                             RUtils.openUrl(mAttachContext, mWebView.getUrl());
                                         }
+                                    }
+                                })
+                                .addItem("复制链接", new View.OnClickListener() {
+                                    @Override
+                                    public void onClick(View v) {
+                                        RUtils.copyText(mTargetUrl);
                                     }
                                 })
                                 .addItem("刷新", new View.OnClickListener() {
@@ -158,87 +225,6 @@ public class X5WebFragment extends BaseTitleFragment {
         super.onTitleBackClick(view);
     }
 
-//    @Override
-//    protected TitleBarPattern getTitleBar() {
-//        TitleBarPattern titleBarPattern = super.getTitleBar()
-//                .setShowBackImageView(false)
-//                .setTitleStringLength(15)
-//                .setTitleString("");
-//        //.setTitleBarBGColor(Color.TRANSPARENT)
-//        //.setFloating(true)
-////        titleBarPattern.addLeftItem(TitleBarPattern.buildImage(R.drawable.guanbi_button, new View.OnClickListener() {
-////            @Override
-////            public void onClick(View v) {
-////                finishIView();
-////            }
-////        }).setVisibility(View.GONE));
-//
-//        titleBarPattern.addLeftItem(TitleBarPattern.buildText("返回", new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                if (onBackPressed()) {
-//                    finishIView();
-//                }
-//            }
-//
-//        }).setOnItemInitListener(new TitleBarItem.OnItemInitListener() {
-//            @Override
-//            public void onItemInit(View itemView, TitleBarItem item) {
-//                if (itemView instanceof TextView) {
-//                    RTextView.setLeftIco((TextView) itemView, R.drawable.base_back);
-//                }
-//            }
-//        }));
-//
-//
-//        titleBarPattern.addLeftItem(TitleBarPattern.buildText("关闭", new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                finishIView();
-//            }
-//        }).setVisibility(View.GONE));
-//
-//        if (showDefaultMenu) {
-//            titleBarPattern
-//                    .addRightItem(TitleBarPattern.buildImage(R.drawable.base_more, new View.OnClickListener() {
-//                        @Override
-//                        public void onClick(View v) {
-//                            UIBottomItemDialog.build()
-//                                    .addItem("在浏览器中打开", new View.OnClickListener() {
-//                                        @Override
-//                                        public void onClick(View v) {
-//                                            if (mWebView != null) {
-//                                                RUtils.openUrl(mActivity, mWebView.getUrl());
-//                                            }
-//                                        }
-//                                    })
-//                                    .addItem("刷新", new View.OnClickListener() {
-//                                        @Override
-//                                        public void onClick(View v) {
-//                                            if (mWebView != null) {
-//                                                mWebView.reload();
-//                                            }
-//                                        }
-//                                    })
-//                                    .showDialog(X5WebFragment.this);
-//                        }
-//                    }))
-//            ;
-//        }
-//
-//        return titleBarPattern;
-//    }
-
-//    @Override
-//    protected void inflateContentLayout(ContentLayout baseContentLayout, LayoutInflater inflater) {
-//        //inflate(R.layout.view_x5_web);
-//        mEmptyView = new EmptyView(mActivity);
-//        int offset = mActivity.getResources().getDimensionPixelOffset(R.dimen.base_xhdpi);
-//        mEmptyView.setPadding(offset, offset, offset, offset);
-//        baseContentLayout.addView(mEmptyView, new ViewGroup.LayoutParams(-1, -1));
-//    }
-
-
     @Override
     protected int getContentLayoutId() {
         return R.layout.base_x5_web_layout;
@@ -249,7 +235,6 @@ public class X5WebFragment extends BaseTitleFragment {
         super.initLeftControlLayout();
         addLeftItem(createCloseItem());
     }
-
 
     /**
      * 创建关闭按钮
@@ -330,52 +315,6 @@ public class X5WebFragment extends BaseTitleFragment {
         }
     }
 
-//    @Override
-//    public void onViewShowFirst(Bundle bundle) {
-//        super.onViewShowFirst(bundle);
-//        inflate(R.layout.base_view_x5_web);
-//        //mEmptyView = mViewHolder.v(R.id.empty_view);
-//        mWebView = mViewHolder.v(R.id.web_view);
-////        WebSettings settings = mWebView.getSettings();
-////        settings.setUserAgent(settings.getUserAgentString() + " KLG_Android");
-//
-//        mProgressBarView = mViewHolder.v(R.id.progress_bar_view);
-//        mRefreshLayout = mViewHolder.v(R.id.refresh_layout);
-//        mRefreshLayout.setRefreshDirection(RefreshLayout.TOP);
-//
-////        mWebView.setWebViewClient(new WebViewClient() {
-////            @Override
-////            public boolean shouldOverrideUrlLoading(WebView webView, String url) {
-////                webView.getSettings().setDefaultTextEncodingName("utf-8");
-////                webView.loadUrl(url);
-////                //getUITitleBarContainer().evaluateBackgroundColorSelf(webView.getScrollY());
-////                return true;
-////            }
-////        });
-//
-////        mWebView.setWebChromeClient(new WebChromeClient() {
-////            @Override
-////            public void onProgressChanged(WebView webView, int progress) {
-////                super.onProgressChanged(webView, progress);
-////                mProgressBarView.setProgress(progress);
-////                if (progress >= 90) {
-////                    mEmptyView.setVisibility(View.GONE);
-////                }
-////            }
-////
-////            @Override
-////            public void onReceivedTitle(WebView webView, String title) {
-////                super.onReceivedTitle(webView, title);
-////                setTitleString(title);
-////            }
-////        });
-//
-//        initWebView();
-//
-//        onLoadUrl();
-//        
-//    }
-
     protected void initWebView() {
         mWebView.setOnWebViewListener(new X5WebView.OnWebViewListener() {
             @Override
@@ -422,6 +361,7 @@ public class X5WebFragment extends BaseTitleFragment {
 
             @Override
             public void shouldOverrideUrlLoading(WebView webView, String url) {
+
                 showDebugUrlView(url);
                 showPageHeader(url);
             }
@@ -451,24 +391,23 @@ public class X5WebFragment extends BaseTitleFragment {
 
                 } else {
                     downloadUrl = url;
-//                    X5FileDownloadUIView dialog = new X5FileDownloadUIView();
-//                    dialog.mDownloadFileBean = new DownloadFileBean();
-//                    dialog.mDownloadFileBean.url = url;
-//                    dialog.mDownloadFileBean.userAgent = userAgent;
-//                    dialog.mDownloadFileBean.fileType = mime;
-//                    dialog.mDownloadFileBean.fileSize = length;
-//                    dialog.mDownloadFileBean.fileName = RUtils.getFileNameFromAttachment(contentDisposition);
-//                    dialog.mDownloadFileBean.contentDisposition = contentDisposition;
-//                    dialog.mDownloadListener = new X5FileDownloadUIView.OnDownloadListener() {
-//                        @Override
-//                        public void onDownload(DownloadFileBean bean) {
-//                            downloadUrl = "";
-//                            if (bean == null) {
-//
-//                            }
-//                        }
-//                    };
-                    //mParentILayout.startIView(dialog);
+                    DownloadFileBean mDownloadFileBean = new DownloadFileBean();
+                    mDownloadFileBean.url = url;
+                    mDownloadFileBean.userAgent = userAgent;
+                    mDownloadFileBean.fileType = mime;
+                    mDownloadFileBean.fileSize = length;
+                    mDownloadFileBean.fileName = RUtils.getFileNameFromAttachment(contentDisposition);
+                    mDownloadFileBean.contentDisposition = contentDisposition;
+
+                    FileDownloadDialog.show(mAttachContext,
+                            mDownloadFileBean,
+                            new FileDownloadDialog.OnDownloadListener() {
+                                @Override
+                                public boolean onDownload(DownloadFileBean bean) {
+                                    downloadUrl = "";
+                                    return false;
+                                }
+                            });
                 }
             }
         });
@@ -481,49 +420,7 @@ public class X5WebFragment extends BaseTitleFragment {
                     return;
                 }
 
-//                UIDialog.build()
-//                        .setLayoutId(R.layout.base_dialog_open_app_layout)
-//                        .setDialogContent("请求打开应用!")
-//                        .setOkText("打开")
-//                        .setOkListener(new View.OnClickListener() {
-//                            @Override
-//                            public void onClick(View v) {
-//
-//                                UILoading.flow(mParentILayout)
-//                                        .setLoadingTipText("正在跳转...")
-//                                        .setCanCancel(false)
-//                                        .setDelayFinish(2000);
-//
-//                                postDelayed(160, new Runnable() {
-//                                    @Override
-//                                    public void run() {
-//                                        mActivity.startActivity(appBean.startIntent);
-//                                    }
-//                                });
-//                            }
-//                        })
-//                        .setOnInitDialogContent(new UIIDialogImpl.OnInitDialogContent() {
-//                            @Override
-//                            public void onInitDialogContent(@NonNull UIIDialogImpl dialog, @NonNull RBaseViewHolder viewHolder) {
-//                                RTextView contentView = viewHolder.v(R.id.base_dialog_content_view);
-//                                LinearLayout.LayoutParams layoutParams = (LinearLayout.LayoutParams) contentView.getLayoutParams();
-//                                layoutParams.gravity = Gravity.CENTER_HORIZONTAL;
-//                                contentView.setLayoutParams(layoutParams);
-//
-//                                RTextView topContentView = viewHolder.v(R.id.base_dialog_top_content_view);
-//                                topContentView.setGravity(Gravity.CENTER_HORIZONTAL);
-//                                topContentView.setVisibility(View.VISIBLE);
-//                                topContentView.setText(appBean.mAppInfo.appName);
-//
-//                                viewHolder.imageView(R.id.app_ico_view).setImageDrawable(appBean.mAppInfo.appIcon);
-//
-//                                //RTextView.setTopIco(topContentView, appBean.mAppInfo.appIcon);
-//                                layoutParams = (LinearLayout.LayoutParams) topContentView.getLayoutParams();
-//                                layoutParams.gravity = Gravity.CENTER_HORIZONTAL;
-//                                topContentView.setLayoutParams(layoutParams);
-//                            }
-//                        })
-//                        .showDialog(mParentILayout);
+                OpenAppDialog.show(mAttachContext, appBean);
             }
         });
     }

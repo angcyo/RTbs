@@ -5,9 +5,6 @@ import com.angcyo.lib.L;
 import com.tencent.smtt.sdk.QbSdk;
 import com.tencent.smtt.sdk.TbsListener;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
-
 /**
  * Created by angcyo on 2018/04/06 17:31
  */
@@ -53,5 +50,34 @@ public class RTbs {
             L.i("腾讯X5 " + e.getMessage());
             e.printStackTrace();
         }
+    }
+
+    /**
+     * 创建json参数
+     */
+    public static String createJSParams(String data, int result) {
+        StringBuilder builder = new StringBuilder();
+        builder.append("'{");
+
+        builder.append("\"");
+        if (result > 0) {
+            builder.append("data");
+        } else {
+            builder.append("error");
+        }
+
+        builder.append("\"");
+        builder.append(":");
+        builder.append(data);
+        builder.append(",");
+
+        builder.append("\"");
+        builder.append("result");
+        builder.append("\"");
+        builder.append(":");
+        builder.append(result);
+
+        builder.append("}'");
+        return builder.toString();
     }
 }
