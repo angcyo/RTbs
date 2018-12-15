@@ -26,8 +26,6 @@ public class OpenAppDialog {
                 .setInitListener(new RDialog.OnInitListener() {
                     @Override
                     public void onInitDialog(@NonNull final AlertDialog dialog, @NonNull RBaseViewHolder dialogViewHolder) {
-                        super.onInitDialog(dialog, dialogViewHolder);
-
                         dialogViewHolder.imageView(R.id.app_ico_view).setImageDrawable(appBean.mAppInfo.appIcon);
                         dialogViewHolder.visible(R.id.base_dialog_top_content_view, true)
                                 .tv(R.id.base_dialog_top_content_view)

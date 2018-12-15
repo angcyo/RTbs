@@ -36,8 +36,6 @@ public class FileDownloadDialog {
                 .setInitListener(new RDialog.OnInitListener() {
                     @Override
                     public void onInitDialog(@NonNull final AlertDialog dialog, @NonNull RBaseViewHolder dialogViewHolder) {
-                        super.onInitDialog(dialog, dialogViewHolder);
-
                         String tempFilename;
                         if (TextUtils.isEmpty(mDownloadFileBean.fileName)) {
                             tempFilename = RUtils.getFileNameFromUrl(mDownloadFileBean.url);
