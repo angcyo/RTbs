@@ -72,7 +72,7 @@ public class FileDownloadDialog {
                                     }
                                 }
 
-                                dialog.dismiss();
+                                dialog.cancel();
                             }
                         });
                     }

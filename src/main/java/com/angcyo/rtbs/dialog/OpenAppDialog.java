@@ -3,7 +3,6 @@ package com.angcyo.rtbs.dialog;
 import android.app.Dialog;
 import android.content.Context;
 import android.support.annotation.NonNull;
-import android.support.v7.app.AlertDialog;
 import android.view.View;
 import com.angcyo.rtbs.R;
 import com.angcyo.uiview.less.recycler.RBaseViewHolder;
@@ -37,13 +36,13 @@ public class OpenAppDialog {
                         dialogViewHolder.text(R.id.base_dialog_cancel_view, "取消", new View.OnClickListener() {
                             @Override
                             public void onClick(View v) {
-                                dialog.dismiss();
+                                dialog.cancel();
                             }
                         });
                         dialogViewHolder.text(R.id.base_dialog_ok_view, "打开", new View.OnClickListener() {
                             @Override
                             public void onClick(View v) {
-                                dialog.dismiss();
+                                dialog.cancel();
                                 context.startActivity(appBean.startIntent);
                             }
                         });
