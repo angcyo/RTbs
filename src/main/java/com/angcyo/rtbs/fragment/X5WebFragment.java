@@ -106,6 +106,11 @@ public class X5WebFragment extends BaseTitleFragment {
      */
     public boolean isPageLoadFinish = false;
 
+    /**
+     * 页面标题
+     */
+    protected String pageTitle = "";
+
     //</editor-fold>
 
 
@@ -335,7 +340,8 @@ public class X5WebFragment extends BaseTitleFragment {
 
             @Override
             public void onReceivedTitle(WebView webView, String title) {
-                setTitleString(title);
+                pageTitle = title;
+                setTitleString(pageTitle);
             }
 
             @Override
