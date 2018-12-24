@@ -75,7 +75,7 @@ public class X5WebFragment extends BaseTitleFragment {
     /**
      * 需要打开的url
      */
-    protected String mTargetUrl;
+    protected String mTargetUrl = "";
     protected boolean floatTitleBar = false;
     protected boolean hideTitle = false;
 
@@ -145,6 +145,32 @@ public class X5WebFragment extends BaseTitleFragment {
                                   @Nullable Bundle arguments,
                                   @Nullable Bundle savedInstanceState) {
         super.onInitBaseView(viewHolder, arguments, savedInstanceState);
+
+        mWebView = baseViewHolder.v(R.id.base_x5_web_view);
+
+        mProgressBarView = baseViewHolder.v(R.id.progress_bar_view);
+        mRefreshLayout = baseViewHolder.v(R.id.base_refresh_layout);
+        mEmptyView = baseViewHolder.v(R.id.base_empty_view);
+
+        initWebView();
+
+        //越界滚动
+        mRefreshLayout.setEnableOverScrollDrag(false);
+        //回弹
+        mRefreshLayout.setEnableOverScrollBounce(false);
+        mRefreshLayout.setScrollBoundaryDecider(new ScrollBoundaryDeciderAdapter() {
+            @Override
+            public boolean canRefresh(View content) {
+                //return super.canRefresh(content);
+                return !mWebView.topCanScroll();
+            }
+
+            @Override
+            public boolean canLoadMore(View content) {
+                return super.canLoadMore(content);
+            }
+        });
+
     }
 
     @Override
@@ -262,15 +288,6 @@ public class X5WebFragment extends BaseTitleFragment {
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        mWebView = baseViewHolder.v(R.id.base_x5_web_view);
-
-        mProgressBarView = baseViewHolder.v(R.id.progress_bar_view);
-        mRefreshLayout = baseViewHolder.v(R.id.base_refresh_layout);
-        mEmptyView = baseViewHolder.v(R.id.base_empty_view);
-
-        initWebView();
-
-        onLoadUrl();
 
         mSoftInputMode = getActivity().getWindow().getAttributes().softInputMode;
         if (Integer.parseInt(android.os.Build.VERSION.SDK) >= 11) {
@@ -278,22 +295,7 @@ public class X5WebFragment extends BaseTitleFragment {
                     WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED);
         }
 
-        //越界滚动
-        mRefreshLayout.setEnableOverScrollDrag(false);
-        //回弹
-        mRefreshLayout.setEnableOverScrollBounce(false);
-        mRefreshLayout.setScrollBoundaryDecider(new ScrollBoundaryDeciderAdapter() {
-            @Override
-            public boolean canRefresh(View content) {
-                //return super.canRefresh(content);
-                return !mWebView.topCanScroll();
-            }
-
-            @Override
-            public boolean canLoadMore(View content) {
-                return super.canLoadMore(content);
-            }
-        });
+        onLoadUrl();
     }
 
     protected void showDebugUrlView(String url) {

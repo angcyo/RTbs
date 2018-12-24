@@ -6,6 +6,7 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.net.Uri;
+import android.os.Bundle;
 import android.os.Message;
 import android.support.annotation.NonNull;
 import android.support.v4.view.MotionEventCompat;
@@ -320,6 +321,31 @@ public class X5WebView extends BridgeWebView implements IWebView {
         public void onReceivedClientCertRequest(WebView webView, ClientCertRequest clientCertRequest) {
             super.onReceivedClientCertRequest(webView, clientCertRequest);
             //L.e("call: onReceivedClientCertRequest([webView, clientCertRequest])-> ");
+        }
+
+        @Override
+        public void onLoadResource(WebView webView, String s) {
+            super.onLoadResource(webView, s);
+        }
+
+        @Override
+        public boolean shouldOverrideUrlLoading(WebView webView, WebResourceRequest webResourceRequest) {
+            return super.shouldOverrideUrlLoading(webView, webResourceRequest);
+        }
+
+        @Override
+        public WebResourceResponse shouldInterceptRequest(WebView webView, String s) {
+            return super.shouldInterceptRequest(webView, s);
+        }
+
+        @Override
+        public WebResourceResponse shouldInterceptRequest(WebView webView, WebResourceRequest webResourceRequest) {
+            return super.shouldInterceptRequest(webView, webResourceRequest);
+        }
+
+        @Override
+        public WebResourceResponse shouldInterceptRequest(WebView webView, WebResourceRequest webResourceRequest, Bundle bundle) {
+            return super.shouldInterceptRequest(webView, webResourceRequest, bundle);
         }
 
         //        /**
