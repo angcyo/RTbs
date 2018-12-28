@@ -239,7 +239,7 @@ public class X5WebView extends BridgeWebView implements IWebView {
         @Override
         public boolean shouldOverrideUrlLoading(WebView webView, String url) {
             L.e("call: shouldOverrideUrlLoading([webView, url])-> " + url + " title:" + webView.getTitle());
-            RUtils.saveToSDCard("webview.log", "title:" + webView.getTitle() + " url:" + url);
+            RTbs.log("title:" + webView.getTitle() + " url:" + url);
 
             if (mOnWebViewListener != null) {
                 mOnWebViewListener.shouldOverrideUrlLoading(webView, url);

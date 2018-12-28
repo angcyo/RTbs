@@ -10,10 +10,7 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.TextView;
 import com.angcyo.lib.L;
-import com.angcyo.rtbs.AndroidJs;
-import com.angcyo.rtbs.DownloadFileBean;
-import com.angcyo.rtbs.R;
-import com.angcyo.rtbs.X5WebView;
+import com.angcyo.rtbs.*;
 import com.angcyo.rtbs.dialog.FileDownloadDialog;
 import com.angcyo.rtbs.dialog.OpenAppDialog;
 import com.angcyo.uiview.less.base.BaseTitleFragment;
@@ -441,6 +438,7 @@ public class X5WebFragment extends BaseTitleFragment {
 
     protected void onLoadUrl() {
         L.i("call: onLoadUrl([])-> 加载网页:" + mTargetUrl);
+        RTbs.log("call: onLoadUrl([])-> 加载网页:" + mTargetUrl);
 
         isPageLoadFinish = false;
 

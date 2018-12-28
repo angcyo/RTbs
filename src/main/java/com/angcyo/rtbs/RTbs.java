@@ -2,6 +2,7 @@ package com.angcyo.rtbs;
 
 import android.content.Context;
 import com.angcyo.lib.L;
+import com.angcyo.uiview.less.utils.RUtils;
 import com.tencent.smtt.sdk.QbSdk;
 import com.tencent.smtt.sdk.TbsListener;
 
@@ -79,5 +80,9 @@ public class RTbs {
 
         builder.append("}'");
         return builder.toString();
+    }
+
+    public static void log(String log) {
+        RUtils.saveToSDCard("webview.log", log);
     }
 }
