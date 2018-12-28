@@ -10,7 +10,10 @@ import com.tencent.smtt.sdk.TbsListener;
  * Created by angcyo on 2018/04/06 17:31
  */
 public class RTbs {
-    public static void init(Context context) {
+    public static boolean DEBUG = BuildConfig.DEBUG;
+
+    public static void init(Context context, boolean debug) {
+        DEBUG = debug;
         //腾讯TBS X5内核浏览器初始化
         try {
             QbSdk.initX5Environment(context.getApplicationContext(), new QbSdk.PreInitCallback() {
@@ -83,6 +86,8 @@ public class RTbs {
     }
 
     public static void log(String log) {
-        RUtils.saveToSDCard("webview.log", log);
+        if (DEBUG) {
+            RUtils.saveToSDCard("webview.log", log);
+        }
     }
 }

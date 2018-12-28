@@ -296,7 +296,7 @@ public class X5WebFragment extends BaseTitleFragment {
     }
 
     protected void showDebugUrlView(String url) {
-        if (L.LOG_DEBUG) {
+        if (RTbs.DEBUG) {
             baseViewHolder.tv(R.id.url_view).setVisibility(View.VISIBLE);
             baseViewHolder.tv(R.id.url_view).setText(url + "\n\n" + mWebView.getSettings().getUserAgentString());
         }
