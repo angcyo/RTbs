@@ -55,9 +55,15 @@ public class X5WebFragment extends BaseTitleFragment {
 
     /**
      * 扩展参数:
-     * 隐藏默认的标题
+     * 隐藏默认的标题文本
      */
     public static final String KEY_HIDE_TITLE = "key_hide_title";
+
+    /**
+     * 扩展参数:
+     * 隐藏默认的标题Bar
+     */
+    public static final String KEY_HIDE_TITLE_BAR = "key_hide_title_bar";
 
     /**
      * 扩展参数:
@@ -75,6 +81,7 @@ public class X5WebFragment extends BaseTitleFragment {
     protected String mTargetUrl = "";
     protected boolean floatTitleBar = false;
     protected boolean hideTitle = false;
+    protected boolean hideTitleBar = false;
 
     /**
      * 显示默认的菜单按钮
@@ -120,6 +127,7 @@ public class X5WebFragment extends BaseTitleFragment {
             mTargetUrl = arguments.getString(KEY_TARGET_URL);
             showDefaultMenu = arguments.getBoolean(KEY_SHOW_DEFAULT_MENU, showDefaultMenu);
             hideTitle = arguments.getBoolean(KEY_HIDE_TITLE, hideTitle);
+            hideTitleBar = arguments.getBoolean(KEY_HIDE_TITLE_BAR, hideTitleBar);
             floatTitleBar = arguments.getBoolean(KEY_FLOAT_TITLE_BAR, floatTitleBar);
         }
 
@@ -176,6 +184,9 @@ public class X5WebFragment extends BaseTitleFragment {
         setTitleString("加载中...");
         if (hideTitle) {
             hideTitleView();
+        }
+        if (hideTitleBar) {
+            hideTitleBar();
         }
         if (floatTitleBar) {
             floatTitleBar();
