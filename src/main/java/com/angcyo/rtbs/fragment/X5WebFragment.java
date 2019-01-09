@@ -379,7 +379,7 @@ public class X5WebFragment extends BaseTitleFragment {
             public void shouldOverrideUrlLoading(WebView webView, String url) {
 
                 showDebugUrlView(url);
-                showPageHeader(url);
+                //showPageHeader(url);
             }
         });
 
