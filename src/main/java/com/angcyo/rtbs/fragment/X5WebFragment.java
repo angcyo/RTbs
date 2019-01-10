@@ -67,6 +67,12 @@ public class X5WebFragment extends BaseTitleFragment {
 
     /**
      * 扩展参数:
+     * 用状态栏的高度, 填充内容布局的top
+     */
+    public static final String KEY_PADDING_TOP = "key_padding_top";
+
+    /**
+     * 扩展参数:
      * 显示默认的菜单按钮
      */
     public static final String KEY_SHOW_DEFAULT_MENU = "key_show_default_menu";
@@ -115,8 +121,24 @@ public class X5WebFragment extends BaseTitleFragment {
      */
     protected String pageTitle = "";
 
+    protected boolean paddingTop = false;
+
     //</editor-fold>
 
+    @Override
+    public String getFragmentTitle() {
+        return super.getFragmentTitle();
+    }
+
+    @Override
+    public void onTitleBackClick(@NonNull View view) {
+        super.onTitleBackClick(view);
+    }
+
+    @Override
+    protected int getContentLayoutId() {
+        return R.layout.base_x5_web_layout;
+    }
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -129,6 +151,7 @@ public class X5WebFragment extends BaseTitleFragment {
             hideTitle = arguments.getBoolean(KEY_HIDE_TITLE, hideTitle);
             hideTitleBar = arguments.getBoolean(KEY_HIDE_TITLE_BAR, hideTitleBar);
             floatTitleBar = arguments.getBoolean(KEY_FLOAT_TITLE_BAR, floatTitleBar);
+            paddingTop = arguments.getBoolean(KEY_PADDING_TOP, paddingTop);
         }
 
         //        String encode = targetUrl;
@@ -176,6 +199,14 @@ public class X5WebFragment extends BaseTitleFragment {
             }
         });
 
+        //在不使用默认的标题栏下, 页面padding状态栏的高度
+        if (paddingTop) {
+            if (contentView != null) {
+                contentView.setPadding(contentView.getPaddingLeft(),
+                        contentView.getPaddingTop() + RUtils.getStatusBarHeight(mAttachContext),
+                        contentView.getPaddingRight(), contentView.getPaddingBottom());
+            }
+        }
     }
 
     @Override
@@ -252,21 +283,6 @@ public class X5WebFragment extends BaseTitleFragment {
                                 .show();
                     }
                 }));
-    }
-
-    @Override
-    public String getFragmentTitle() {
-        return super.getFragmentTitle();
-    }
-
-    @Override
-    public void onTitleBackClick(@NonNull View view) {
-        super.onTitleBackClick(view);
-    }
-
-    @Override
-    protected int getContentLayoutId() {
-        return R.layout.base_x5_web_layout;
     }
 
     @Override

@@ -561,6 +561,17 @@ public class X5WebView extends BridgeWebView implements IWebView {
 
     float touchMoveDy = 0;
 
+    /**
+     * 在有些页面, 不可以滚动, 但是手势move之后 tbs_onOverScrolled 没有回调.
+     * 此时 重置 lastMoveDy=0
+     */
+    Runnable checkScrollRunnable = new Runnable() {
+        @Override
+        public void run() {
+            lastMoveDy = 0;
+        }
+    };
+
     // TBS: Do not use @Override to avoid false calls
     public boolean tbs_dispatchTouchEvent(MotionEvent event, View view) {
         int actionMasked = MotionEventCompat.getActionMasked(event);
@@ -585,7 +596,10 @@ public class X5WebView extends BridgeWebView implements IWebView {
                     lastMoveDy = dy;
                 }
             } else {
+                //手指向上滑动
                 lastMoveDy = dy;
+                removeCallbacks(checkScrollRunnable);
+                postDelayed(checkScrollRunnable, 360);
             }
         } else if (actionMasked == MotionEvent.ACTION_UP) {
         }
@@ -631,6 +645,8 @@ public class X5WebView extends BridgeWebView implements IWebView {
 //        isStopInTop = /*clampedY &&*/ scrollY == 0 /*&& mLastDeltaY <= 0;*/;
 //        L.e("tbs_onOverScrolled()-> " + scrollY + " " + clampedY + " " + mLastDeltaY);
 
+        removeCallbacks(checkScrollRunnable);
+
         this.scrollY = scrollY;
         if (scrollY == 0) {
             //H5内嵌滚动条, 不管滚动到顶部和底部, scrollY 都是0
@@ -645,6 +661,7 @@ public class X5WebView extends BridgeWebView implements IWebView {
 
 
     protected void tbs_computeScroll(View view) {
+        removeCallbacks(checkScrollRunnable);
         super_computeScroll();
     }
 
