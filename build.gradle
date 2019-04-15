@@ -6,5 +6,10 @@ if (getRootProject().hasProperty("allGradle")) {
 
 dependencies {
     api fileTree(include: ['*.jar'], dir: 'libs')
-    compileOnly project(":UIViewLess")
+
+    if (getRootProject().hasProperty("allModule")) {
+        compileOnly project(allModule.UIViewLess)
+    } else {
+        compileOnly project(":UIViewLess")
+    }
 }
